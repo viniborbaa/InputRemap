@@ -99,7 +99,7 @@ Pré-requisitos do E2E: ≥2 mesas (Spaces) na tela do cursor; Terminal com perm
 - [ ] **Fase 1 — Descoberta do hardware** (Options+ pausado ~2 min)
   - [ ] Log de eventos: botões do Lift, rodinha, tecla de print
   - [ ] Códigos reais viram constantes testadas
-- [ ] **Fase 2 — Back → ⌘C**
+- [x] **Fase 2 — Back → ⌘C**
 - [ ] **Fase 3 — Forward → ⌘V**
 - [ ] **Fase 4 — Clique simples na rodinha → Mission Control**
 - [ ] **Fase 5 — Arrastar ↑ / ↓ → Mission Control / App Exposé**

@@ -34,6 +34,18 @@ final class Harness {
         pause(0.3) // deixa o campo de texto assumir o cursor
     }
 
+    /// Centro da janela de teste em coordenadas globais (origem no canto superior esquerdo).
+    /// Eventos de mouse vão para a janela sob o cursor: injetar aqui garante que, se o
+    /// InputRemap não bloquear o clique, ele cai na janela de teste e não no app do usuário.
+    var center: CGPoint {
+        let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] ?? []
+        let w = list.first { ($0[kCGWindowOwnerPID as String] as? Int) == Int(pid) &&
+                             ($0[kCGWindowLayer as String] as? Int) == 0 }
+        var r = CGRect.zero
+        if let b = w?[kCGWindowBounds as String] { CGRectMakeWithDictionaryRepresentation(b as! CFDictionary, &r) }
+        return CGPoint(x: r.midX, y: r.midY)
+    }
+
     var content: String { (try? String(contentsOf: outFile, encoding: .utf8)) ?? "" }
 
     deinit {
