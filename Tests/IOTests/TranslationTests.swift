@@ -34,6 +34,18 @@ import RemapCore
         #expect(EventTranslator.input(from: mouse(.otherMouseDown, button: 3, tag: ownEventTag)) == nil)
     }
 
+    /// O app instalado (LaunchAgent) não pode reagir aos eventos injetados pelo E2E:
+    /// senão mandaria ⌘C/⌘V para o app em foco do usuário enquanto os testes rodam.
+    @Test func modoInstaladoIgnoraEventosDoE2E() {
+        #expect(EventTranslator.input(from: mouse(.otherMouseDown, button: 3, tag: testEventTag),
+                                      ignoringTestEvents: true) == nil)
+    }
+
+    @Test func modoDeTesteProcessaEventosDoE2E() {
+        #expect(EventTranslator.input(from: mouse(.otherMouseDown, button: 3, tag: testEventTag),
+                                      ignoringTestEvents: false) == .mouseDown(button: 3))
+    }
+
     @Test func copiarEhCmdC() {
         #expect(KeyStroke(for: .copy) == KeyStroke(keyCode: 8, flags: .maskCommand))
     }

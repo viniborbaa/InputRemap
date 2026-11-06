@@ -6,11 +6,15 @@ import RemapCore
 /// Marca dos eventos gerados pelo próprio InputRemap (para não reprocessá-los).
 public let ownEventTag: Int64 = 0x1A9E7
 
+/// Marca dos eventos injetados pelos testes E2E (mesmo valor usado em Tests/E2ETests).
+public let testEventTag: Int64 = 0x7E57
+
 public enum EventTranslator {
     /// Converte um CGEvent em entrada do núcleo. `nil` = não interessa (inclui eventos
-    /// gerados pelo próprio app).
-    public static func input(from event: CGEvent) -> Input? {
-        if event.getIntegerValueField(.eventSourceUserData) == ownEventTag { return nil }
+    /// gerados pelo próprio app e, com `ignoringTestEvents`, os injetados pelo E2E).
+    public static func input(from event: CGEvent, ignoringTestEvents: Bool = false) -> Input? {
+        let tag = event.getIntegerValueField(.eventSourceUserData)
+        if tag == ownEventTag || (ignoringTestEvents && tag == testEventTag) { return nil }
         let button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
         switch event.type {
         case .otherMouseDown: return .mouseDown(button: button)
