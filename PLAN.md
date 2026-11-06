@@ -109,3 +109,11 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
 
 - 2026-11-06 — Plano criado. Rascunho inicial (não-TDD) guardado em
   `docs/rascunho-main.swift.txt` apenas como referência.
+- 2026-11-06 — Fase 0: CLT 16.2 com arquivos velhos misturados mesmo após
+  reinstalar. Correções (renomeados, não apagados):
+  `ManifestAPI/PackageDescription.swiftmodule/*.private.swiftinterface` → `.stale-5.10`
+  (causava "Undefined symbols Package.__allocating_init") e
+  `usr/include/swift/module.modulemap` → `.stale-2023` ("redefinition of module
+  SwiftBridging"). Também apagar o cache `…/C/clang/ModuleCache/PackageDescription-*`.
+  Se a CLT for atualizada, conferir se voltaram.
+- 2026-11-06 — Ambiente: 2 telas, 2 mesas por tela. Terminal ainda sem Acessibilidade.
