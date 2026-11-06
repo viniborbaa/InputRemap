@@ -56,6 +56,14 @@ enum ScreenCapture {
         return list.contains { pids.contains(($0[kCGWindowOwnerPID as String] as? Int) ?? -1) }
     }
 
+    /// Cancela a seleção de região mandando Esc direto ao processo da captura de tela
+    /// (nunca global: poderia cair no Terminal e interromper o Claude Code).
+    static func cancelSelection() {
+        guard let pid = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.screencaptureui")
+                .first?.processIdentifier else { return }
+        Inject.key(53, to: pid)
+    }
+
     /// Arrasta com o botão esquerdo para selecionar uma região pequena ao redor do cursor.
     /// Só chamar com a seleção de região aberta (senão o arrasto cairia no app em foco).
     static func dragSmallRegion() {

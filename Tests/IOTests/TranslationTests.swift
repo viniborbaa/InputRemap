@@ -48,4 +48,8 @@ import RemapCore
         #expect(KeyStroke(for: .missionControl) == KeyStroke(keyCode: 126, flags: Self.arrow))
         #expect(!KeyStroke(for: .missionControl).isAppShortcut)
     }
+
+    @Test func appExposeEhCtrlSetaParaBaixo() {
+        #expect(KeyStroke(for: .appExpose) == KeyStroke(keyCode: 125, flags: Self.arrow))
+    }
 }

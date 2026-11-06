@@ -17,7 +17,7 @@ extension E2E {
             let before = ScreenCapture.files()
             var newFiles: Set<String> { ScreenCapture.files().subtracting(before) }
             defer {
-                if ScreenCapture.selectionIsOpen { Inject.systemKey(53) }
+                if ScreenCapture.selectionIsOpen { ScreenCapture.cancelSelection() }
                 // Limpa arquivos criados pelo teste (rodada vermelha), esperando a gravação tardia.
                 _ = try? waitUntil("arquivo tardio", timeout: 8) { !newFiles.isEmpty }
                 for f in newFiles {

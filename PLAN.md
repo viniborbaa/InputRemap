@@ -80,7 +80,7 @@ swift test --skip E2E   # unitários + integração (rápido, sem efeito na tela
 E2E=1 swift test        # tudo; o E2E toma a tela por ~30–60 s, não mexa no mouse
 ```
 
-Pré-requisitos do E2E: ≥2 mesas (Spaces) na tela do cursor; Terminal com permissão de Acessibilidade.
+Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app em tela cheia não contam); Terminal com permissão de Acessibilidade.
 
 **Regras de segurança do E2E** (após os incidentes 1 e 2):
 - Teclas comuns (⌘C, ⌘V, letras) **nunca** são postadas globalmente: só via
@@ -102,7 +102,7 @@ Pré-requisitos do E2E: ≥2 mesas (Spaces) na tela do cursor; Terminal com perm
 - [x] **Fase 2 — Back → ⌘C**
 - [x] **Fase 3 — Forward → ⌘V**
 - [x] **Fase 4 — Clique simples na rodinha → Mission Control**
-- [ ] **Fase 5 — Arrastar ↑ / ↓ → Mission Control / App Exposé**
+- [x] **Fase 5 — Arrastar ↑ / ↓ → Mission Control / App Exposé**
 - [ ] **Fase 6 — Arrastar ← / → → trocar de mesa**
 - [x] **Fase 7 — Tecla de print → região no clipboard** (sem código no app:
   `scripts/configure-print-key.sh` troca os atalhos do macOS; `--undo` desfaz)
@@ -170,3 +170,13 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   **interrompia o Claude Code**. Regra: Esc global só com a sobreposição
   confirmada aberta, e o usuário deixa o foco de teclado fora do Terminal
   durante o E2E.
+- 2026-11-06 — Fase 5: E2E fortalecido — o gesto precisa abrir a visão geral com o
+  botão AINDA pressionado (senão o clique ao soltar também abriria e o teste passaria
+  sem a funcionalidade). App Exposé ficou travado quando a janela de teste foi
+  encerrada com ele aberto (o Swift libera objetos após o último uso) → a limpeza
+  fecha a visão geral com o mesmo atalho (⌃↑/⌃↓, liga/desliga) ANTES de encerrar
+  janela e app. **Esc removido de todo envio global** (`globalAllowed` = só setas);
+  cancelar a captura usa `postToPid` para o screencaptureui.
+- 2026-11-06 — Testes de mesa: escolhem uma tela com ≥2 mesas comuns e abrem a
+  janela de teste lá. A "mesa" 21 do monitor externo é um app em tela cheia (type 4)
+  e é ignorada.

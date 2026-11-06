@@ -30,7 +30,13 @@ extension E2E {
         }
 
         @Test func atalhoDeMesaTrocaMesaDaTelaDoCursor() throws {
-            Overview.close()
+            try #require(!Overview.isOpen())
+            let target = try #require(Spaces.displayWithMultipleSpaces(), "precisa de uma tela com 2+ mesas comuns (não tela cheia)")
+            // Leva o cursor para essa tela, sobre uma janela de teste (movimento inofensivo).
+            let h = try Harness(text: "mesa", center: CGPoint(x: target.bounds.midX, y: target.bounds.midY))
+            defer { _ = h }
+            Inject.mouse(.mouseMoved, button: 0, at: h.center)
+            pause(0.2)
             let start = Spaces.cursorDisplay()
             try #require(start.spaces.count >= 2, "precisa de 2+ mesas na tela do cursor")
             // Na ponta direita o ⌃→ não faz nada: vai na direção que existe.
@@ -47,9 +53,8 @@ extension E2E {
         }
 
         @Test func atalhoDeMissionControlAbreVisaoGeral() throws {
-            Overview.close()
-            defer { Overview.close() }
             try #require(!Overview.isOpen())
+            defer { Overview.close(toggle: 126) }
             Inject.systemKey(126, .maskControl) // ⌃↑
             try waitUntil("Mission Control abrir") { Overview.isOpen() }
         }

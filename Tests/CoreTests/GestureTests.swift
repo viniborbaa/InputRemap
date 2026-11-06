@@ -34,4 +34,40 @@ import Testing
         var r = Remapper()
         #expect(r.handle(.mouseDragged(button: Button.middle, dx: 100, dy: 0)) == .passThrough)
     }
+
+    // MARK: Fase 5 — arrastar ↑ / ↓
+
+    @Test func arrastarParaCimaAbreMissionControl() {
+        var r = Remapper()
+        #expect(allOutputs(gesture(&r, steps: [(0, -40), (0, -40)])) == [.missionControl])
+    }
+
+    @Test func arrastarParaBaixoAbreAppExpose() {
+        var r = Remapper()
+        #expect(allOutputs(gesture(&r, steps: [(0, 40), (0, 40)])) == [.appExpose])
+    }
+
+    @Test func gestoDisparaDuranteOArrastoNaoAoSoltar() {
+        var r = Remapper()
+        let ds = gesture(&r, steps: [(0, 40), (0, 40)])
+        #expect(ds[2].outputs == [.appExpose]) // [down, drag, drag(cruza limiar), up]
+        #expect(ds[3].outputs.isEmpty)
+    }
+
+    @Test func gestoDisparaUmaVezSoPorPressionada() {
+        var r = Remapper()
+        let ds = gesture(&r, steps: [(0, -70), (0, -70), (0, 140), (0, 200)])
+        #expect(allOutputs(ds) == [.missionControl])
+    }
+
+    @Test func eixoDominanteDecide() {
+        var r = Remapper()
+        #expect(allOutputs(gesture(&r, steps: [(40, -70)])) == [.missionControl])
+    }
+
+    @Test func novoGestoDepoisDeSoltarDisparaDeNovo() {
+        var r = Remapper()
+        _ = gesture(&r, steps: [(0, -100)])
+        #expect(allOutputs(gesture(&r, steps: [(0, 100)])) == [.appExpose])
+    }
 }

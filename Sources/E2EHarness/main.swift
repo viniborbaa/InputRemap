@@ -26,6 +26,14 @@ final class Delegate: NSObject, NSApplicationDelegate, NSTextViewDelegate {
     func applicationDidFinishLaunching(_ n: Notification) {
         window = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 420, height: 160),
                           styleMask: [.titled], backing: .buffered, defer: false)
+        // --center x y: centro da janela em coordenadas globais (origem no canto superior
+        // esquerdo da tela principal), para posicionar em outra tela.
+        if let x = arg("--center").flatMap(Double.init),
+           let i = CommandLine.arguments.firstIndex(of: "--center"), i + 2 < CommandLine.arguments.count,
+           let y = Double(CommandLine.arguments[i + 2]) {
+            let mainHeight = NSScreen.screens[0].frame.height
+            window.setFrameOrigin(NSPoint(x: x - 210, y: mainHeight - y - 80))
+        }
         window.title = "InputRemap E2E"
         textView = NSTextView(frame: window.contentView!.bounds)
         textView.autoresizingMask = [.width, .height]

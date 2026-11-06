@@ -18,6 +18,7 @@ public enum Output: Equatable {
     case copy
     case paste
     case missionControl
+    case appExpose
 }
 
 public struct Decision: Equatable {
@@ -42,6 +43,17 @@ public struct Remapper {
 
     var gesture: Gesture?
 
+    /// Pixels de arrasto acumulado até o gesto disparar.
+    public static let threshold: Double = 60
+
+    /// Gesto correspondente ao arrasto acumulado, ou nil se ainda não passou do limiar.
+    /// Eixo dominante decide. Coordenadas de tela: y negativo = para cima.
+    static func direction(dx: Double, dy: Double) -> Output? {
+        guard max(abs(dx), abs(dy)) > threshold else { return nil }
+        if abs(dy) >= abs(dx) { return dy < 0 ? .missionControl : .appExpose }
+        return nil // horizontal: Fase 6
+    }
+
     public init() {}
 
     public mutating func handle(_ input: Input) -> Decision {
@@ -54,10 +66,16 @@ public struct Remapper {
             gesture = Gesture()
             return Decision(swallow: true, outputs: [])
         case let .mouseDragged(Button.middle, dx, dy):
-            guard gesture != nil else { return .passThrough }
-            gesture!.dx += dx
-            gesture!.dy += dy
-            return Decision(swallow: true, outputs: [])
+            guard var g = gesture else { return .passThrough }
+            g.dx += dx
+            g.dy += dy
+            var outputs: [Output] = []
+            if !g.fired, let out = Self.direction(dx: g.dx, dy: g.dy) {
+                g.fired = true
+                outputs = [out]
+            }
+            gesture = g
+            return Decision(swallow: true, outputs: outputs)
         case .mouseUp(Button.middle):
             defer { gesture = nil }
             guard let g = gesture else { return .passThrough }

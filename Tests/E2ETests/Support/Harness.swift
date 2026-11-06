@@ -22,11 +22,13 @@ final class Harness {
     var pid: pid_t { process.processIdentifier }
 
     /// Abre a janela de teste com `text` selecionado e espera ela ficar pronta.
-    init(text: String) throws {
+    /// `center`: posição da janela em coordenadas globais (ex.: numa tela com 2+ mesas).
+    init(text: String, center: CGPoint? = nil) throws {
         outFile = FileManager.default.temporaryDirectory
             .appendingPathComponent("e2e-harness-\(UUID().uuidString).txt")
         process.executableURL = builtProduct("E2EHarness")
         process.arguments = ["--text", text, "--out", outFile.path]
+            + (center.map { ["--center", "\($0.x)", "\($0.y)"] } ?? [])
         try process.run()
         try waitUntil("janela de teste abrir", timeout: 5) {
             FileManager.default.fileExists(atPath: outFile.path)

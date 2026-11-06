@@ -37,12 +37,12 @@ func pause(_ s: TimeInterval) { RunLoop.current.run(until: Date().addingTimeInte
 enum Inject {
     static let arrowFlags: CGEventFlags = [.maskSecondaryFn, .maskNumericPad]
 
-    /// Teclas que podem ir para o sistema todo: setas (com ⌃ = atalhos de mesa/Mission
-    /// Control, tratados pelo macOS) e Esc. Qualquer outra tecla global poderia cair
-    /// no app em foco do usuário — proibido (ver incidentes no PLAN.md).
-    static let globalAllowed: Set<CGKeyCode> = [53, 123, 124, 125, 126]
+    /// Teclas que podem ir para o sistema todo: só setas (com ⌃ = atalhos de mesa/Mission
+    /// Control, sempre consumidos pelo macOS). Qualquer outra tecla global poderia cair no
+    /// app em foco — inclusive o Terminal, onde Esc interrompe o Claude Code (incidentes 1–3).
+    static let globalAllowed: Set<CGKeyCode> = [123, 124, 125, 126]
 
-    /// Atalho de sistema, postado globalmente. Só setas e Esc.
+    /// Atalho de sistema, postado globalmente. Só ⌃ + setas.
     static func systemKey(_ code: CGKeyCode, _ flags: CGEventFlags = []) {
         precondition(globalAllowed.contains(code), "tecla \(code) não pode ser postada globalmente")
         var f = flags
@@ -113,6 +113,26 @@ enum Spaces {
         return copy(conn).takeRetainedValue() as? [[String: Any]] ?? []
     }
 
+    /// Uma tela com 2+ mesas (UUID e retângulo em coordenadas globais), se existir.
+    static func displayWithMultipleSpaces() -> (uuid: String, bounds: CGRect)? {
+        var ids = [CGDirectDisplayID](repeating: 0, count: 8)
+        var n: UInt32 = 0
+        CGGetActiveDisplayList(8, &ids, &n)
+        for d in displays() {
+            // Só mesas comuns (type 0). Espaços de app em tela cheia (type 4) ficam de fora:
+            // alternar para eles esconderia o app do usuário (ex.: Terminal em tela cheia).
+            let regular = (d["Spaces"] as? [[String: Any]] ?? []).filter { ($0["type"] as? Int) == 0 }
+            guard let uuid = d["Display Identifier"] as? String, regular.count >= 2 else { continue }
+            for id in ids.prefix(Int(n)) {
+                let u = CFUUIDCreateString(nil, CGDisplayCreateUUIDFromDisplayID(id).takeRetainedValue()) as String
+                if u == uuid || (uuid == "Main" && id == CGMainDisplayID()) {
+                    return (uuid, CGDisplayBounds(id))
+                }
+            }
+        }
+        return nil
+    }
+
     /// UUID da tela onde está o cursor — é nela que ⌃← / ⌃→ agem.
     static func cursorDisplayUUID() -> String {
         var id: CGDirectDisplayID = 0
@@ -146,8 +166,15 @@ enum Overview {
         }
     }
 
-    static func close() {
-        if isOpen() { Inject.systemKey(53) } // Esc
+    /// Fecha a visão geral com o mesmo atalho que a abriu (⌃↑ Mission Control, ⌃↓ App
+    /// Exposé), que funciona como liga/desliga e é sempre consumido pelo macOS.
+    /// Nunca usa Esc: sem sobreposição aberta, o Esc cairia no Terminal e interromperia
+    /// o Claude Code (incidente 3). Espera antes, porque a visão geral pode abrir com atraso.
+    static func close(toggle: CGKeyCode) {
+        precondition([125, 126].contains(toggle), "fechar só com ⌃↑ ou ⌃↓")
+        _ = try? waitUntil("visão geral aparecer (se for abrir)", timeout: 0.6) { isOpen() }
+        guard isOpen() else { return }
+        Inject.systemKey(toggle, .maskControl)
         try? waitUntil("visão geral fechar") { !isOpen() }
     }
 }
