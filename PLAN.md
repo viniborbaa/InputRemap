@@ -79,13 +79,21 @@ swift test --skip E2E   # unitários + integração (rápido, sem efeito na tela
 E2E=1 swift test        # tudo; o E2E toma a tela por ~30–60 s, não mexa no mouse
 ```
 
-Pré-requisitos do E2E: ≥2 mesas (Spaces); Terminal com permissão de Acessibilidade.
+Pré-requisitos do E2E: ≥2 mesas (Spaces) na tela do cursor; Terminal com permissão de Acessibilidade.
+
+**Regras de segurança do E2E** (após os incidentes 1 e 2):
+- Teclas comuns (⌘C, ⌘V, letras) **nunca** são postadas globalmente: só via
+  `postToPid` para a janela de teste. `Inject.systemKey` só aceita setas e Esc
+  (com `precondition`).
+- Em modo de teste, o InputRemap também entrega ⌘C/⌘V via `postToPid` para a
+  janela de teste (flag de linha de comando).
+- Testes de mesa usam a **tela do cursor** e sempre restauram a mesa original.
 
 ## Fases
 
-- [ ] **Fase 0 — Fundação**
+- [x] **Fase 0 — Fundação**
   - [x] Pacote Swift + teste vazio rodando com `swift test`
-  - [ ] Spike E2E: injetar eventos e detectar troca de mesa, Mission Control, clipboard
+  - [x] Spike E2E: injetar eventos e detectar troca de mesa, Mission Control, clipboard
   - [x] Spike: eventos injetados passam pelo event tap do app
 - [ ] **Fase 1 — Descoberta do hardware** (Options+ pausado ~2 min)
   - [ ] Log de eventos: botões do Lift, rodinha, tecla de print
@@ -98,7 +106,8 @@ Pré-requisitos do E2E: ≥2 mesas (Spaces); Terminal com permissão de Acessibi
 - [ ] **Fase 7 — Tecla de print → região no clipboard**
 - [ ] **Fase 8 — Robustez** (sem loop, religar tap após timeout, regressão de passagem)
 - [ ] **Fase 9 — Empacotamento** (.app, assinatura ad-hoc, LaunchAgent, E2E de inicialização/RAM)
-- [ ] **Fase 10 — Troca definitiva** (checklist com hardware físico, desinstalar Options+)
+- [ ] **Fase 10 — Troca definitiva** (checklist com hardware físico, desinstalar Options+,
+  **remover Acessibilidade do Terminal**)
 
 ## Rollback
 
@@ -142,3 +151,5 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   InputRemap usa `postToPid(harness)` para ⌘C/⌘V. Atalhos de sistema (⌃←→↑↓)
   seguem globais. Entrega global de ⌘C/⌘V → teste de integração + checklist
   manual com hardware.
+- 2026-11-06 — Fase 0 concluída: 5 autotestes do harness verdes 3× seguidas.
+  Correção: ⌃←/⌃→ agem na tela do cursor (2 telas, "mesas separadas por tela").

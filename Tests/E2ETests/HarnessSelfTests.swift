@@ -7,49 +7,50 @@ import Testing
 extension E2E {
     @Suite struct HarnessSelfTests {
 
-        @Test func janelaDeTesteGanhaFoco() throws {
-            let h = try Harness(text: "foco")
-            try h.requireFocus()
+        @Test func teclaEntreguePorPidChegaNaJanelaDeTeste() throws {
+            let h = try Harness(text: "abc")
+            Inject.key(0, to: h.pid) // "a" substitui a seleção
+            try waitUntil("campo virar 'a'") { h.content == "a" }
         }
 
-        @Test func cmdCInjetadoCopiaTextoDaJanelaDeTeste() throws {
+        @Test func cmdCPorPidCopiaTextoDaJanelaDeTeste() throws {
             let marker = "e2e-copy-\(UInt32.random(in: .min ... .max))"
             Clipboard.set("antes")
             let h = try Harness(text: marker)
-            try h.requireFocus()
-            Inject.key(8, .maskCommand) // ⌘C
+            Inject.key(8, .maskCommand, to: h.pid) // ⌘C
             try waitUntil("clipboard receber o texto") { Clipboard.string == marker }
         }
 
-        @Test func cmdVInjetadoColaNaJanelaDeTeste() throws {
+        @Test func cmdVPorPidColaNaJanelaDeTeste() throws {
             let marker = "e2e-paste-\(UInt32.random(in: .min ... .max))"
             Clipboard.set(marker)
             let h = try Harness(text: "substituir")
-            try h.requireFocus()
-            Inject.key(9, .maskCommand) // ⌘V
+            Inject.key(9, .maskCommand, to: h.pid) // ⌘V
             try waitUntil("campo receber o texto colado") { h.content == marker }
         }
 
-        @Test func atalhoDeMesaTrocaMesaAtiva() throws {
-            let (index, count) = Spaces.activeIndex()
-            try #require(count >= 2, "precisa de 2+ mesas na tela ativa")
-            let original = Spaces.active()
+        @Test func atalhoDeMesaTrocaMesaDaTelaDoCursor() throws {
+            Overview.close()
+            let start = Spaces.cursorDisplay()
+            try #require(start.spaces.count >= 2, "precisa de 2+ mesas na tela do cursor")
             // Na ponta direita o ⌃→ não faz nada: vai na direção que existe.
-            let (go, back): (CGKeyCode, CGKeyCode) = index < count - 1 ? (124, 123) : (123, 124)
+            let (go, back): (CGKeyCode, CGKeyCode) =
+                start.index < start.spaces.count - 1 ? (124, 123) : (123, 124)
             defer {
-                if Spaces.active() != original {
-                    Inject.key(back, .maskControl)
-                    try? waitUntil("voltar à mesa original") { Spaces.active() == original }
+                if Spaces.cursorDisplay().current != start.current {
+                    Inject.systemKey(back, .maskControl)
+                    try? waitUntil("voltar à mesa original") { Spaces.cursorDisplay().current == start.current }
                 }
             }
-            Inject.key(go, .maskControl)
-            try waitUntil("mesa mudar") { Spaces.active() != original }
+            Inject.systemKey(go, .maskControl)
+            try waitUntil("mesa mudar") { Spaces.cursorDisplay().current != start.current }
         }
 
         @Test func atalhoDeMissionControlAbreVisaoGeral() throws {
+            Overview.close()
             defer { Overview.close() }
-            #expect(!Overview.isOpen())
-            Inject.key(126, .maskControl) // ⌃↑
+            try #require(!Overview.isOpen())
+            Inject.systemKey(126, .maskControl) // ⌃↑
             try waitUntil("Mission Control abrir") { Overview.isOpen() }
         }
     }

@@ -9,13 +9,11 @@ let e2eEnabled = ProcessInfo.processInfo.environment["E2E"] == "1"
 let testEventTag: Int64 = 0x7E57
 
 enum E2EError: Error, CustomStringConvertible {
-    case focusLost(expected: pid_t, actual: pid_t?)
     case timeout(String)
     case notFound(String)
 
     var description: String {
         switch self {
-        case let .focusLost(e, a): return "foco perdido: esperado pid \(e), em foco \(a.map(String.init) ?? "nenhum")"
         case let .timeout(s): return "tempo esgotado: \(s)"
         case let .notFound(s): return "não encontrado: \(s)"
         }
@@ -34,24 +32,19 @@ func waitUntil(_ what: String, timeout: TimeInterval = 3, _ cond: () -> Bool) th
 
 func pause(_ s: TimeInterval) { RunLoop.current.run(until: Date().addingTimeInterval(s)) }
 
-// MARK: - Foco
-
-/// PID do dono da janela normal (camada 0) mais à frente na tela.
-/// Lido direto do servidor de janelas a cada chamada: não depende de run loop do AppKit.
-/// (O atributo de Acessibilidade kAXFocusedApplication retorna erro -25204 neste Mac.)
-func frontmostPID() -> pid_t? {
-    let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
-        as? [[String: Any]] ?? []
-    let top = list.first { ($0[kCGWindowLayer as String] as? Int) == 0 }
-    return (top?[kCGWindowOwnerPID as String] as? NSNumber).map { pid_t($0.int32Value) }
-}
-
 // MARK: - Injeção
 
 enum Inject {
     static let arrowFlags: CGEventFlags = [.maskSecondaryFn, .maskNumericPad]
 
-    static func key(_ code: CGKeyCode, _ flags: CGEventFlags = []) {
+    /// Teclas que podem ir para o sistema todo: setas (com ⌃ = atalhos de mesa/Mission
+    /// Control, tratados pelo macOS) e Esc. Qualquer outra tecla global poderia cair
+    /// no app em foco do usuário — proibido (ver incidentes no PLAN.md).
+    static let globalAllowed: Set<CGKeyCode> = [53, 123, 124, 125, 126]
+
+    /// Atalho de sistema, postado globalmente. Só setas e Esc.
+    static func systemKey(_ code: CGKeyCode, _ flags: CGEventFlags = []) {
+        precondition(globalAllowed.contains(code), "tecla \(code) não pode ser postada globalmente")
         var f = flags
         if (123...126).contains(code) { f.formUnion(arrowFlags) }
         for down in [true, false] {
@@ -59,6 +52,16 @@ enum Inject {
             e.flags = f
             e.setIntegerValueField(.eventSourceUserData, value: testEventTag)
             e.post(tap: .cghidEventTap)
+        }
+    }
+
+    /// Tecla entregue direto a um processo: nunca chega a outro app.
+    static func key(_ code: CGKeyCode, _ flags: CGEventFlags = [], to pid: pid_t) {
+        for down in [true, false] {
+            let e = CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: down)!
+            e.flags = flags
+            e.setIntegerValueField(.eventSourceUserData, value: testEventTag)
+            e.postToPid(pid)
         }
     }
 
@@ -105,22 +108,29 @@ enum Spaces {
         unsafeBitCast(dlsym(lib, "SLSGetActiveSpace"), to: SpaceFn.self)(conn)
     }
 
-    /// Mesas (IDs em ordem) da tela que contém a mesa ativa.
-    static func activeDisplaySpaces() -> [UInt64] {
+    private static func displays() -> [[String: Any]] {
         let copy = unsafeBitCast(dlsym(lib, "SLSCopyManagedDisplaySpaces"), to: CopyFn.self)
-        let displays = copy(conn).takeRetainedValue() as! [[String: Any]]
-        let cur = active()
-        for d in displays {
-            let ids = (d["Spaces"] as? [[String: Any]] ?? []).compactMap { ($0["ManagedSpaceID"] as? NSNumber)?.uint64Value }
-            if ids.contains(cur) { return ids }
-        }
-        return []
+        return copy(conn).takeRetainedValue() as? [[String: Any]] ?? []
     }
 
-    /// Índice da mesa ativa na sua tela.
-    static func activeIndex() -> (index: Int, count: Int) {
-        let ids = activeDisplaySpaces()
-        return (ids.firstIndex(of: active()) ?? 0, ids.count)
+    /// UUID da tela onde está o cursor — é nela que ⌃← / ⌃→ agem.
+    static func cursorDisplayUUID() -> String {
+        var id: CGDirectDisplayID = 0
+        var n: UInt32 = 0
+        CGGetDisplaysWithPoint(CGEvent(source: nil)!.location, 1, &id, &n)
+        return CFUUIDCreateString(nil, CGDisplayCreateUUIDFromDisplayID(id).takeRetainedValue()) as String
+    }
+
+    /// Estado da tela do cursor: mesa atual, lista de mesas em ordem e índice da atual.
+    static func cursorDisplay() -> (current: UInt64, spaces: [UInt64], index: Int) {
+        let uuid = cursorDisplayUUID()
+        let d = displays().first { ($0["Display Identifier"] as? String) == uuid }
+            ?? displays().first { ($0["Display Identifier"] as? String) == "Main" }
+            ?? [:]
+        let spaces = (d["Spaces"] as? [[String: Any]] ?? [])
+            .compactMap { ($0["ManagedSpaceID"] as? NSNumber)?.uint64Value }
+        let current = ((d["Current Space"] as? [String: Any])?["ManagedSpaceID"] as? NSNumber)?.uint64Value ?? 0
+        return (current, spaces, spaces.firstIndex(of: current) ?? 0)
     }
 }
 
@@ -137,7 +147,7 @@ enum Overview {
     }
 
     static func close() {
-        if isOpen() { Inject.key(53) } // Esc
+        if isOpen() { Inject.systemKey(53) } // Esc
         try? waitUntil("visão geral fechar") { !isOpen() }
     }
 }
