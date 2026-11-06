@@ -213,7 +213,7 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   (⌃←/⌃→ não trocam de espaço). Teste desativado. Ideias: logar no app os eventos
   `tapDisabledBy*`; checar se o macOS entrega os eventos atrasados do botão 6/3 de
   forma inesperada; fazer `scripts/e2e.sh` checar visão geral aberta antes de restaurar.
-- 2026-11-06 — **Estado para retomar:** 47 testes (1 desativado). Próximo passo:
+- 2026-11-06 — **Estado para retomar:** 56 testes (1 desativado). Próximo passo:
   **Fase 10** (checklist com o hardware físico, desinstalar Options+, tirar
   Acessibilidade do Terminal). Fase 9 feita: app instalado e com Acessibilidade. Pendência: Fase 8
   religar. Ambiente: tela do Mac = Mesa 1 | Terminal tela cheia (175) | Mesa 189;
