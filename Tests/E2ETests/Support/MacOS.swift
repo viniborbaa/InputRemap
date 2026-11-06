@@ -194,6 +194,31 @@ enum Overview {
     }
 }
 
+// MARK: - Launchpad
+
+enum Launchpad {
+    static let url = URL(fileURLWithPath: "/System/Applications/Launchpad.app")
+
+    /// O Launchpad cria janelas do Dock nas camadas 27/29.
+    static func isOpen() -> Bool {
+        let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] ?? []
+        return list.contains {
+            ($0[kCGWindowOwnerName as String] as? String) == "Dock" &&
+            [27, 29].contains($0[kCGWindowLayer as String] as? Int ?? 0)
+        }
+    }
+
+    /// Fecha abrindo o Launchpad.app de novo (liga/desliga). Nunca Esc (incidente 3).
+    static func close() {
+        _ = try? waitUntil("Launchpad aparecer (se for abrir)", timeout: 0.6) { isOpen() }
+        guard isOpen() else { return }
+        LSOpenCFURLRef(url as CFURL, nil)
+        // A animação de saída passa por janelas nas camadas da visão geral (18/20):
+        // espera tudo sumir, senão o próximo teste acha uma visão geral "aberta".
+        try? waitUntil("Launchpad fechar") { !isOpen() && !Overview.isOpen() }
+    }
+}
+
 // MARK: - Clipboard
 
 enum Clipboard {

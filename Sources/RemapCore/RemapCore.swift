@@ -18,7 +18,7 @@ public enum Output: Equatable {
     case copy
     case paste
     case missionControl
-    case appExpose
+    case launchpad
     case spaceLeft
     case spaceRight
 }
@@ -52,7 +52,7 @@ public struct Remapper {
     /// Eixo dominante decide. Coordenadas de tela: y negativo = para cima.
     static func direction(dx: Double, dy: Double) -> Output? {
         guard max(abs(dx), abs(dy)) > threshold else { return nil }
-        if abs(dy) >= abs(dx) { return dy < 0 ? .missionControl : .appExpose }
+        if abs(dy) >= abs(dx) { return dy < 0 ? .missionControl : .launchpad }
         return dx < 0 ? .spaceLeft : .spaceRight
     }
 

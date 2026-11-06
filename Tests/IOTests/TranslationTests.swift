@@ -58,11 +58,15 @@ import RemapCore
 
     @Test func missionControlEhCtrlSetaParaCima() {
         #expect(KeyStroke(for: .missionControl) == KeyStroke(keyCode: 126, flags: Self.arrow))
-        #expect(!KeyStroke(for: .missionControl).isAppShortcut)
+        #expect(KeyStroke(for: .missionControl)?.isAppShortcut == false)
     }
 
-    @Test func appExposeEhCtrlSetaParaBaixo() {
-        #expect(KeyStroke(for: .appExpose) == KeyStroke(keyCode: 125, flags: Self.arrow))
+    /// Launchpad não tem atalho de teclado ligado por padrão: o app abre o Launchpad.app.
+    @Test func launchpadNaoEhTeclaEAbreOApp() {
+        #expect(KeyStroke(for: .launchpad) == nil)
+        #expect(KeyPoster.makeEvents(for: .launchpad).isEmpty)
+        #expect(Launcher.app(for: .launchpad)?.path == "/System/Applications/Launchpad.app")
+        #expect(Launcher.app(for: .copy) == nil)
     }
 
     @Test func mesasSaoCtrlSetasLaterais() {

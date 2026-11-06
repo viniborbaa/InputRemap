@@ -42,15 +42,15 @@ import Testing
         #expect(allOutputs(gesture(&r, steps: [(0, -40), (0, -40)])) == [.missionControl])
     }
 
-    @Test func arrastarParaBaixoAbreAppExpose() {
+    @Test func arrastarParaBaixoAbreLaunchpad() {
         var r = Remapper()
-        #expect(allOutputs(gesture(&r, steps: [(0, 40), (0, 40)])) == [.appExpose])
+        #expect(allOutputs(gesture(&r, steps: [(0, 40), (0, 40)])) == [.launchpad])
     }
 
     @Test func gestoDisparaDuranteOArrastoNaoAoSoltar() {
         var r = Remapper()
         let ds = gesture(&r, steps: [(0, 40), (0, 40)])
-        #expect(ds[2].outputs == [.appExpose]) // [down, drag, drag(cruza limiar), up]
+        #expect(ds[2].outputs == [.launchpad]) // [down, drag, drag(cruza limiar), up]
         #expect(ds[3].outputs.isEmpty)
     }
 
@@ -68,7 +68,7 @@ import Testing
     @Test func novoGestoDepoisDeSoltarDisparaDeNovo() {
         var r = Remapper()
         _ = gesture(&r, steps: [(0, -100)])
-        #expect(allOutputs(gesture(&r, steps: [(0, 100)])) == [.appExpose])
+        #expect(allOutputs(gesture(&r, steps: [(0, 100)])) == [.launchpad])
     }
 
     // MARK: Fase 6 — arrastar ← / →

@@ -1,6 +1,8 @@
 // Adaptadores entre CGEvent e o RemapCore.
 
 import CoreGraphics
+import CoreServices
+import Foundation
 import RemapCore
 
 /// Marca dos eventos gerados pelo próprio InputRemap (para não reprocessá-los).
@@ -37,12 +39,13 @@ public struct KeyStroke: Equatable {
         self.flags = flags
     }
 
-    public init(for output: Output) {
+    /// `nil` = a saída não é uma tecla (ex.: Launchpad, que abre um app).
+    public init?(for output: Output) {
         switch output {
         case .copy: self.init(keyCode: 8, flags: .maskCommand)
         case .paste: self.init(keyCode: 9, flags: .maskCommand)
         case .missionControl: self.init(keyCode: 126, flags: Self.arrow)
-        case .appExpose: self.init(keyCode: 125, flags: Self.arrow)
+        case .launchpad: return nil
         case .spaceLeft: self.init(keyCode: 123, flags: Self.arrow)
         case .spaceRight: self.init(keyCode: 124, flags: Self.arrow)
         }
@@ -55,6 +58,13 @@ public struct KeyStroke: Equatable {
     public var isAppShortcut: Bool { flags.contains(.maskCommand) }
 }
 
+/// Saídas que abrem um app em vez de mandar uma tecla.
+public enum Launcher {
+    public static func app(for output: Output) -> URL? {
+        output == .launchpad ? URL(fileURLWithPath: "/System/Applications/Launchpad.app") : nil
+    }
+}
+
 /// Envia os atalhos. Em modo de teste (`deliverTo`), atalhos de app vão direto para
 /// aquele processo e nunca para o app em foco do usuário.
 public struct KeyPoster {
@@ -64,7 +74,7 @@ public struct KeyPoster {
 
     /// Eventos de tecla (pressionar e soltar) do atalho, marcados como gerados pelo app.
     public static func makeEvents(for output: Output) -> [CGEvent] {
-        let k = KeyStroke(for: output)
+        guard let k = KeyStroke(for: output) else { return [] }
         return [true, false].compactMap { down in
             guard let e = CGEvent(keyboardEventSource: nil, virtualKey: k.keyCode, keyDown: down) else { return nil }
             e.flags = k.flags
@@ -74,7 +84,11 @@ public struct KeyPoster {
     }
 
     public func post(_ output: Output) {
-        let appShortcut = KeyStroke(for: output).isAppShortcut
+        if let url = Launcher.app(for: output) {
+            LSOpenCFURLRef(url as CFURL, nil)
+            return
+        }
+        let appShortcut = KeyStroke(for: output)?.isAppShortcut ?? false
         for e in Self.makeEvents(for: output) {
             if let pid = deliverTo, appShortcut { e.postToPid(pid) } else { e.post(tap: .cghidEventTap) }
         }

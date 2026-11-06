@@ -11,7 +11,7 @@ para o mouse **Logitech Lift** e o teclado **MX Keys S**, desenvolvido com
 | Rodinha segurada + arrastar ← | Mesa da **esquerda** (⌃←) |
 | Rodinha segurada + arrastar → | Mesa da **direita** (⌃→) |
 | Rodinha segurada + arrastar ↑ | Mission Control (⌃↑) |
-| Rodinha segurada + arrastar ↓ | App Exposé (⌃↓) |
+| Rodinha segurada + arrastar ↓ | Launchpad (abre o Launchpad.app) |
 | Clique simples na rodinha | Mission Control (⌃↑) |
 | Botão Back | ⌘C |
 | Botão Forward | ⌘V |
@@ -56,7 +56,7 @@ Verificações E2E:
 | Forward → ⌘V | Clipboard com texto → botão 4 → texto aparece no campo |
 | Arrastar ← / → | ID da mesa ativa (`CGSGetActiveSpace`) muda; requer ≥2 mesas |
 | Arrastar ↑ / clique | Mission Control aberto (janelas do Dock na lista de janelas) → Esc |
-| Arrastar ↓ | App Exposé aberto → Esc |
+| Arrastar ↓ | Launchpad aberto (janelas do Dock nas camadas 27/29) → fecha reabrindo o app |
 | Tecla de print | Seleção de região abre → arrasto simulado → clipboard contém imagem |
 | Passagem | Clique esquerdo/direito e digitação normal passam intactos |
 | Inicialização | LaunchAgent sobe o app; matar → volta; RAM < 20 MB |
@@ -213,6 +213,10 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   (⌃←/⌃→ não trocam de espaço). Teste desativado. Ideias: logar no app os eventos
   `tapDisabledBy*`; checar se o macOS entrega os eventos atrasados do botão 6/3 de
   forma inesperada; fazer `scripts/e2e.sh` checar visão geral aberta antes de restaurar.
+- 2026-11-06 — Teste com hardware: tudo funcionou e "mais rápido que antes"; o ↓ (App
+  Exposé) não era usado → trocado por **Launchpad** a pedido do usuário. Sem atalho de
+  teclado padrão, o app abre o Launchpad.app (liga/desliga). Ao fechar, o Launchpad passa
+  por janelas nas camadas 18/20; o E2E espera elas sumirem.
 - 2026-11-06 — **Estado para retomar:** 56 testes (1 desativado). Próximo passo:
   **Fase 10** (checklist com o hardware físico, desinstalar Options+, tirar
   Acessibilidade do Terminal). Fase 9 feita: app instalado e com Acessibilidade. Pendência: Fase 8

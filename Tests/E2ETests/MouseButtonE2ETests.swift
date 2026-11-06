@@ -60,7 +60,20 @@ extension E2E {
         }
 
         @Test func arrastarParaCimaAbreMissionControl() throws { try dragOpensOverview(dy: -150, toggle: 126) }
-        @Test func arrastarParaBaixoAbreAppExpose() throws { try dragOpensOverview(dy: 150, toggle: 125) }
+
+        @Test func arrastarParaBaixoAbreLaunchpad() throws {
+            try #require(!Launchpad.isOpen())
+            let h = try Harness(text: "launchpad")
+            let app = try AppRunner(deliverTo: h.pid)
+            defer { Launchpad.close(); _ = (h, app) }
+            Inject.mouse(.otherMouseDown, button: 2, at: h.center)
+            defer { Inject.mouse(.otherMouseUp, button: 2, at: h.center) }
+            for _ in 0..<10 {
+                Inject.mouse(.otherMouseDragged, button: 2, at: h.center, delta: (0, 15))
+                pause(0.01)
+            }
+            try waitUntil("Launchpad abrir com o botão ainda pressionado") { Launchpad.isOpen() }
+        }
     
         // MARK: Fase 6
 
