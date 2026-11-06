@@ -7,6 +7,14 @@ import Testing
 extension E2E {
     @Suite struct HarnessSelfTests {
 
+        /// `pause` precisa esperar de verdade, em qualquer thread (o Swift Testing não roda
+        /// os testes na main thread, e um RunLoop sem fontes retorna na hora).
+        @Test func pauseEsperaDeVerdade() {
+            let start = Date()
+            pause(0.5)
+            #expect(Date().timeIntervalSince(start) >= 0.45)
+        }
+
         @Test func teclaEntreguePorPidChegaNaJanelaDeTeste() throws {
             let h = try Harness(text: "abc")
             Inject.key(0, to: h.pid) // "a" substitui a seleção

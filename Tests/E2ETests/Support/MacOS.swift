@@ -25,12 +25,17 @@ func waitUntil(_ what: String, timeout: TimeInterval = 3, _ cond: () -> Bool) th
     let end = Date().addingTimeInterval(timeout)
     while Date() < end {
         if cond() { return }
-        RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        pause(0.05)
     }
     throw E2EError.timeout(what)
 }
 
-func pause(_ s: TimeInterval) { RunLoop.current.run(until: Date().addingTimeInterval(s)) }
+/// Espera `s` segundos. Fora da main thread (onde o Swift Testing roda os testes) o RunLoop
+/// não tem fontes e `run(until:)` volta na hora, então dorme a thread.
+func pause(_ s: TimeInterval) {
+    if Thread.isMainThread { RunLoop.current.run(until: Date().addingTimeInterval(s)) }
+    else { Thread.sleep(forTimeInterval: s) }
+}
 
 // MARK: - Injeção
 

@@ -117,7 +117,13 @@ Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app e
   - [x] Atalhos gerados pelo app são marcados e ignorados — sem loop (integração)
   - [ ] Religar tap após timeout: E2E escrito mas **desativado** (incidente 4).
         Pendente: investigar com logs + checagem de mutação (remover o religamento → teste vermelho)
-- [ ] **Fase 9 — Empacotamento** (.app, assinatura ad-hoc, LaunchAgent, E2E de inicialização/RAM)
+- [x] **Fase 9 — Empacotamento** (.app, assinatura ad-hoc, LaunchAgent, E2E de inicialização/RAM)
+  - `scripts/install.sh` (e `--uninstall`): `~/Applications/InputRemap.app` + LaunchAgent
+    `com.viniborba.inputremap` (RunAtLoad, KeepAlive), log em `~/Library/Logs/InputRemap.log`.
+  - Instalado, ignora eventos marcados pelo E2E (0x7E57) para não mandar ⌘C/⌘V ao app do usuário.
+  - Sem Acessibilidade, pede uma vez e espera (sair faria o KeepAlive relançar em loop).
+  - Binário só é trocado se mudou: a permissão fica presa à assinatura ad-hoc.
+  - Medido: ~2,5 MB de memória (Options+ ~480 MB).
 - [ ] **Fase 10 — Troca definitiva** (checklist com hardware físico, desinstalar Options+,
   **remover Acessibilidade do Terminal**)
 
@@ -208,7 +214,12 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   `tapDisabledBy*`; checar se o macOS entrega os eventos atrasados do botão 6/3 de
   forma inesperada; fazer `scripts/e2e.sh` checar visão geral aberta antes de restaurar.
 - 2026-11-06 — **Estado para retomar:** 47 testes (1 desativado). Próximo passo:
-  **Fase 9** (empacotar .app, assinatura ad-hoc, LaunchAgent, E2E de inicialização/RAM;
-  o macOS vai pedir Acessibilidade para o InputRemap). Depois Fase 10. Pendência: Fase 8
+  **Fase 10** (checklist com o hardware físico, desinstalar Options+, tirar
+  Acessibilidade do Terminal). Fase 9 feita: app instalado e com Acessibilidade. Pendência: Fase 8
   religar. Ambiente: tela do Mac = Mesa 1 | Terminal tela cheia (175) | Mesa 189;
   monitor = Mesa 60 | Claude tela cheia (21). Rodar E2E sempre via `scripts/e2e.sh`.
+- 2026-11-06 — Fase 9 concluída. Achado: `pause()` dos E2E não esperava nada fora da main
+  thread (RunLoop sem fontes volta na hora; o Swift Testing não usa a main thread). Os
+  `pause` (inclusive o de 6 s do teste do print) eram no-op e o `waitUntil` girava sem
+  dormir. Corrigido com `Thread.sleep` + teste `pauseEsperaDeVerdade`. Suíte: 55 ✔, 1
+  desativado (incidente 4 — talvez relacionado: as esperas não aconteciam).
