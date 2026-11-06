@@ -15,7 +15,8 @@ para o mouse **Logitech Lift** e o teclado **MX Keys S**, desenvolvido com
 | Clique simples na rodinha | Mission Control (⌃↑) |
 | Botão Back | ⌘C |
 | Botão Forward | ⌘V |
-| Tecla de print do MX Keys S | ⌃⇧⌘4 (região → clipboard) |
+| Tecla de print do MX Keys S (envia ⌘⇧4 nativo) | região → clipboard (atalhos do macOS trocados) |
+| ⌃⇧⌘4 digitado à mão | região → arquivo (antes era ⌘⇧4) |
 
 Decisões:
 - Arrastar para a esquerda vai para a mesa da esquerda (sem inversão estilo trackpad).
@@ -103,7 +104,8 @@ Pré-requisitos do E2E: ≥2 mesas (Spaces) na tela do cursor; Terminal com perm
 - [ ] **Fase 4 — Clique simples na rodinha → Mission Control**
 - [ ] **Fase 5 — Arrastar ↑ / ↓ → Mission Control / App Exposé**
 - [ ] **Fase 6 — Arrastar ← / → → trocar de mesa**
-- [ ] **Fase 7 — Tecla de print → região no clipboard**
+- [x] **Fase 7 — Tecla de print → região no clipboard** (sem código no app:
+  `scripts/configure-print-key.sh` troca os atalhos do macOS; `--undo` desfaz)
 - [ ] **Fase 8 — Robustez** (sem loop, religar tap após timeout, regressão de passagem)
 - [ ] **Fase 9 — Empacotamento** (.app, assinatura ad-hoc, LaunchAgent, E2E de inicialização/RAM)
 - [ ] **Fase 10 — Troca definitiva** (checklist com hardware físico, desinstalar Options+,
@@ -159,3 +161,12 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   - Tecla de print do MX Keys S **sem Options+ envia ⌘⇧4** nativo (keyCode 21,
     flags ⌘+⇧, modificadores e tecla em ~1 ms) → abre a captura de região **para arquivo**.
   - "Change pointer speed": sem evento padrão identificado (provável HID++ da Logitech).
+- 2026-11-06 — Fase 7 (antecipada): opção A escolhida — trocar atalhos do macOS
+  (id 31 ⌘⇧4 = região→clipboard; id 30 ⌃⇧⌘4 = região→arquivo). Red: ⌘⇧4 salvava
+  arquivo; green após script. Achados: a janela da captura se chama "Screenshot"
+  (detectar pelo PID do `com.apple.screencaptureui`); arquivo só é gravado após a
+  miniatura sumir (~5 s), primeiro com nome temporário `.Screenshot…`.
+- 2026-11-06 — ⚠️ Incidente 3: Esc global sem nada aberto caía no Terminal e
+  **interrompia o Claude Code**. Regra: Esc global só com a sobreposição
+  confirmada aberta, e o usuário deixa o foco de teclado fora do Terminal
+  durante o E2E.
