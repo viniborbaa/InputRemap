@@ -31,7 +31,9 @@ let callback: CGEventTapCallBack = { _, type, event, info in
     return decision.swallow ? nil : Unmanaged.passUnretained(event)
 }
 
-let mask: CGEventMask = (1 << CGEventType.otherMouseDown.rawValue) | (1 << CGEventType.otherMouseUp.rawValue)
+let mask: CGEventMask = (1 << CGEventType.otherMouseDown.rawValue) |
+    (1 << CGEventType.otherMouseUp.rawValue) |
+    (1 << CGEventType.otherMouseDragged.rawValue)
 guard let tap = CGEvent.tapCreate(tap: .cghidEventTap, place: .headInsertEventTap, options: .defaultTap,
                                   eventsOfInterest: mask, callback: callback,
                                   userInfo: Unmanaged.passUnretained(context).toOpaque()) else {

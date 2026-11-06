@@ -27,5 +27,18 @@ extension E2E {
             try waitUntil("campo receber o texto colado") { h.content == marker }
             _ = app
         }
+    
+        // MARK: Fase 4
+
+        @Test func cliqueDaRodinhaAbreMissionControl() throws {
+            Overview.close()
+            defer { Overview.close() }
+            let h = try Harness(text: "rodinha")
+            let app = try AppRunner(deliverTo: h.pid)
+            Inject.mouse(.otherMouseDown, button: 2, at: h.center)
+            Inject.mouse(.otherMouseUp, button: 2, at: h.center)
+            try waitUntil("Mission Control abrir") { Overview.isOpen() }
+            _ = app
+        }
     }
 }

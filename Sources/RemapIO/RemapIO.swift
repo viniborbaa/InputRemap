@@ -15,6 +15,10 @@ public enum EventTranslator {
         switch event.type {
         case .otherMouseDown: return .mouseDown(button: button)
         case .otherMouseUp: return .mouseUp(button: button)
+        case .otherMouseDragged:
+            return .mouseDragged(button: button,
+                                 dx: Double(event.getIntegerValueField(.mouseEventDeltaX)),
+                                 dy: Double(event.getIntegerValueField(.mouseEventDeltaY)))
         default: return nil
         }
     }
@@ -33,8 +37,12 @@ public struct KeyStroke: Equatable {
         switch output {
         case .copy: self.init(keyCode: 8, flags: .maskCommand)
         case .paste: self.init(keyCode: 9, flags: .maskCommand)
+        case .missionControl: self.init(keyCode: 126, flags: Self.arrow)
         }
     }
+
+    /// ⌃ + seta (atalhos de mesa/Mission Control); setas precisam de fn + teclado numérico.
+    static let arrow: CGEventFlags = [.maskControl, .maskSecondaryFn, .maskNumericPad]
 
     /// Atalhos de app (⌘C/⌘V) dependem do app em foco; atalhos de sistema não.
     public var isAppShortcut: Bool { flags.contains(.maskCommand) }

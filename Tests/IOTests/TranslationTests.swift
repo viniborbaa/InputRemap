@@ -23,6 +23,13 @@ import RemapCore
         #expect(EventTranslator.input(from: mouse(.otherMouseUp, button: 4)) == .mouseUp(button: 4))
     }
 
+    @Test func otherMouseDraggedViraMouseDraggedComDeltas() {
+        let e = mouse(.otherMouseDragged, button: 2)
+        e.setIntegerValueField(.mouseEventDeltaX, value: 7)
+        e.setIntegerValueField(.mouseEventDeltaY, value: -3)
+        #expect(EventTranslator.input(from: e) == .mouseDragged(button: 2, dx: 7, dy: -3))
+    }
+
     @Test func eventosGeradosPeloProprioAppSaoIgnorados() {
         #expect(EventTranslator.input(from: mouse(.otherMouseDown, button: 3, tag: ownEventTag)) == nil)
     }
@@ -33,5 +40,12 @@ import RemapCore
 
     @Test func colarEhCmdV() {
         #expect(KeyStroke(for: .paste) == KeyStroke(keyCode: 9, flags: .maskCommand))
+    }
+
+    static let arrow: CGEventFlags = [.maskControl, .maskSecondaryFn, .maskNumericPad]
+
+    @Test func missionControlEhCtrlSetaParaCima() {
+        #expect(KeyStroke(for: .missionControl) == KeyStroke(keyCode: 126, flags: Self.arrow))
+        #expect(!KeyStroke(for: .missionControl).isAppShortcut)
     }
 }

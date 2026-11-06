@@ -101,7 +101,7 @@ Pré-requisitos do E2E: ≥2 mesas (Spaces) na tela do cursor; Terminal com perm
   - [ ] Códigos reais viram constantes testadas
 - [x] **Fase 2 — Back → ⌘C**
 - [x] **Fase 3 — Forward → ⌘V**
-- [ ] **Fase 4 — Clique simples na rodinha → Mission Control**
+- [x] **Fase 4 — Clique simples na rodinha → Mission Control**
 - [ ] **Fase 5 — Arrastar ↑ / ↓ → Mission Control / App Exposé**
 - [ ] **Fase 6 — Arrastar ← / → → trocar de mesa**
 - [x] **Fase 7 — Tecla de print → região no clipboard** (sem código no app:
