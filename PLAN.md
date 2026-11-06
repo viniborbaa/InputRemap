@@ -124,13 +124,17 @@ Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app e
   - Sem Acessibilidade, pede uma vez e espera (sair faria o KeepAlive relançar em loop).
   - Binário só é trocado se mudou: a permissão fica presa à assinatura ad-hoc.
   - Medido: ~2,5 MB de memória (Options+ ~480 MB).
-- [ ] **Fase 10 — Troca definitiva** (checklist com hardware físico, desinstalar Options+,
+- [x] **Fase 10 — Troca definitiva** (checklist com hardware físico, desinstalar Options+,
   **remover Acessibilidade do Terminal**)
+  - Hardware: tudo funcionou (↓ trocado por Launchpad).
+  - Options+ removido (sem desinstalador oficial): agentes/daemon, apps, Application
+    Support, recibos de pacote; dados do usuário foram para a Lixeira com prefixo `logi-`.
+  - Acessibilidade do Terminal: removida pelo usuário. Religar se for rodar o E2E de novo.
 
 ## Rollback
 
-A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
-/Library/LaunchAgents/com.logi.optionsplus.plist`) e parar o InputRemap.
+`scripts/install.sh --uninstall` remove o InputRemap; o Options+ foi desinstalado
+(2026-11-06) e teria de ser baixado de novo do site da Logitech.
 
 ## Diário
 
@@ -221,11 +225,10 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   adicionar o app nos Ajustes não resolveu. Resolvido com `tccutil reset Accessibility
   com.viniborba.inputremap` + ligar a chave no aviso (o app pega a permissão sem reiniciar).
   O `install.sh` agora faz o reset sozinho quando o binário muda.
-- 2026-11-06 — **Estado para retomar:** 56 testes (1 desativado). Próximo passo:
-  **Fase 10** (checklist com o hardware físico, desinstalar Options+, tirar
-  Acessibilidade do Terminal). Fase 9 feita: app instalado e com Acessibilidade. Pendência: Fase 8
-  religar. Ambiente: tela do Mac = Mesa 1 | Terminal tela cheia (175) | Mesa 189;
-  monitor = Mesa 60 | Claude tela cheia (21). Rodar E2E sempre via `scripts/e2e.sh`.
+- 2026-11-06 — **Estado para retomar:** projeto concluído. App instalado via
+  `scripts/install.sh` (LaunchAgent), Options+ desinstalado. Pendências opcionais: teste
+  de religar (incidente 4, desativado). Para mexer de novo: religar a Acessibilidade do
+  Terminal, rodar E2E só via `scripts/e2e.sh`, reinstalar e aceitar o aviso de permissão.
 - 2026-11-06 — Fase 9 concluída. Achado: `pause()` dos E2E não esperava nada fora da main
   thread (RunLoop sem fontes volta na hora; o Swift Testing não usa a main thread). Os
   `pause` (inclusive o de 6 s do teste do print) eram no-op e o `waitUntil` girava sem
