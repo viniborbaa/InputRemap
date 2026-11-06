@@ -8,9 +8,10 @@ let package = Package(
         .target(name: "RemapCore"),
         .target(name: "RemapIO", dependencies: ["RemapCore"]),
         .executableTarget(name: "InputRemap", dependencies: ["RemapCore", "RemapIO"]),
+        // Janela de teste usada só pelo E2E (foco garantido para injeção de teclado).
+        .executableTarget(name: "E2EHarness"),
         .testTarget(name: "CoreTests", dependencies: ["RemapCore"]),
         .testTarget(name: "IOTests", dependencies: ["RemapIO"]),
-        .testTarget(name: "E2ETests", dependencies: []),
+        .testTarget(name: "E2ETests", dependencies: ["E2EHarness", "InputRemap"]),
     ]
-
 )

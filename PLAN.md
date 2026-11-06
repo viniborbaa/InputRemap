@@ -133,3 +133,12 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
     garantido → usar janela própria de teste (harness) e verificar que ela é
     o app em foco antes de cada injeção; abortar o teste caso contrário.
     Nada foi alterado no Arc (só seleção + cópia); clipboard limpo.
+- 2026-11-06 — ⚠️ Incidente 2 (harness): a janela de teste aparecia na frente e
+  dizia ser janela-chave ("key"), mas teclas postadas em `.cghidEventTap` **não
+  chegavam nela** — iam para o app ativo anterior (Arc/Ajustes). Na 2ª rodada,
+  ⌘C e ⌘V (`e2e-paste-1134045407`) e 3× "a" podem ter caído em outro app.
+  `postToPid` entrega corretamente. `kAXFocusedApplication` retorna -25204.
+  **Decisão proposta:** E2E nunca posta teclado globalmente; em modo de teste o
+  InputRemap usa `postToPid(harness)` para ⌘C/⌘V. Atalhos de sistema (⌃←→↑↓)
+  seguem globais. Entrega global de ⌘C/⌘V → teste de integração + checklist
+  manual com hardware.
