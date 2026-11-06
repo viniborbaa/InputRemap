@@ -94,3 +94,23 @@ public struct KeyPoster {
         }
     }
 }
+
+/// Inverte a rodinha do mouse (ver `ScrollPolicy`).
+public enum ScrollInverter {
+    public static func shouldInvert(_ e: CGEvent, ignoringTestEvents: Bool) -> Bool {
+        let tag = e.getIntegerValueField(.eventSourceUserData)
+        if tag == ownEventTag || (ignoringTestEvents && tag == testEventTag) { return false }
+        return ScrollPolicy.shouldInvert(continuous: e.getIntegerValueField(.scrollWheelEventIsContinuous) != 0)
+    }
+
+    /// Nega os deltas do eixo vertical (linhas, pontos e ponto fixo); o horizontal fica igual.
+    public static func invertVertical(_ e: CGEvent) {
+        // Lê tudo antes: escrever um campo faz o CoreGraphics recalcular os outros.
+        let delta = e.getIntegerValueField(.scrollWheelEventDeltaAxis1)
+        let point = e.getIntegerValueField(.scrollWheelEventPointDeltaAxis1)
+        let fixed = e.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1)
+        e.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: -delta)
+        e.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1, value: -fixed)
+        e.setIntegerValueField(.scrollWheelEventPointDeltaAxis1, value: -point)
+    }
+}

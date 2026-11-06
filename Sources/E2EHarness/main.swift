@@ -19,7 +19,7 @@ let outPath: String = arg("--out") ?? {
     exit(2)
 }()
 
-/// Área que registra cada clique recebido: "left", "right" ou "other<n>".
+/// Área que registra cada clique recebido ("left", "right", "other<n>") e o sentido das rolagens.
 final class ClickPad: NSView {
     var onClick: (String) -> Void = { _ in }
     override func draw(_ r: NSRect) { NSColor.systemGray.withAlphaComponent(0.2).setFill(); r.fill() }
@@ -27,6 +27,10 @@ final class ClickPad: NSView {
     override func mouseDown(with e: NSEvent) { onClick("left") }
     override func rightMouseDown(with e: NSEvent) { onClick("right") }
     override func otherMouseDown(with e: NSEvent) { onClick("other\(e.buttonNumber)") }
+    /// Rolagem: registra só o sentido recebido ("scrollUp" / "scrollDown").
+    override func scrollWheel(with e: NSEvent) {
+        if e.scrollingDeltaY > 0 { onClick("scrollUp") } else if e.scrollingDeltaY < 0 { onClick("scrollDown") }
+    }
 }
 
 final class Delegate: NSObject, NSApplicationDelegate, NSTextViewDelegate {

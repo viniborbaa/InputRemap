@@ -84,4 +84,41 @@ import RemapCore
         let e = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: true)!
         #expect(EventTranslator.input(from: e) == nil)
     }
+
+    // MARK: Rolagem
+
+    func scroll(vertical: Int32, horizontal: Int32 = 0) -> CGEvent {
+        CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: vertical, wheel2: horizontal, wheel3: 0)!
+    }
+
+    @Test func inverteSoOEixoVertical() {
+        let e = scroll(vertical: 3, horizontal: 2)
+        let point = e.getIntegerValueField(.scrollWheelEventPointDeltaAxis1)
+        let fixed = e.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1)
+        ScrollInverter.invertVertical(e)
+        #expect(e.getIntegerValueField(.scrollWheelEventDeltaAxis1) == -3)
+        #expect(e.getIntegerValueField(.scrollWheelEventPointDeltaAxis1) == -point)
+        #expect(e.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1) == -fixed)
+        #expect(e.getIntegerValueField(.scrollWheelEventDeltaAxis2) == 2)
+    }
+
+    @Test func rolagemDoMouseDeveSerInvertida() {
+        let e = scroll(vertical: 1)
+        e.setIntegerValueField(.scrollWheelEventIsContinuous, value: 0)
+        #expect(ScrollInverter.shouldInvert(e, ignoringTestEvents: true))
+    }
+
+    @Test func rolagemDoTrackpadNaoDeveSerInvertida() {
+        let e = scroll(vertical: 1)
+        e.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
+        #expect(!ScrollInverter.shouldInvert(e, ignoringTestEvents: true))
+    }
+
+    @Test func rolagemInjetadaPeloE2ESoEhInvertidaEmModoDeTeste() {
+        let e = scroll(vertical: 1)
+        e.setIntegerValueField(.scrollWheelEventIsContinuous, value: 0)
+        e.setIntegerValueField(.eventSourceUserData, value: testEventTag)
+        #expect(!ScrollInverter.shouldInvert(e, ignoringTestEvents: true))
+        #expect(ScrollInverter.shouldInvert(e, ignoringTestEvents: false))
+    }
 }

@@ -39,6 +39,12 @@ let callback: CGEventTapCallBack = { _, type, event, info in
         if let t = ctx.tap { CGEvent.tapEnable(tap: t, enable: true) }
         return Unmanaged.passUnretained(event)
     }
+    if type == .scrollWheel {
+        if ScrollInverter.shouldInvert(event, ignoringTestEvents: deliverTo == nil) {
+            ScrollInverter.invertVertical(event)
+        }
+        return Unmanaged.passUnretained(event)
+    }
     if let b = hangButton, type == .otherMouseDown, event.getIntegerValueField(.mouseEventButtonNumber) == b {
         Thread.sleep(forTimeInterval: 3)
     }
@@ -52,7 +58,8 @@ let callback: CGEventTapCallBack = { _, type, event, info in
 
 let mask: CGEventMask = (1 << CGEventType.otherMouseDown.rawValue) |
     (1 << CGEventType.otherMouseUp.rawValue) |
-    (1 << CGEventType.otherMouseDragged.rawValue)
+    (1 << CGEventType.otherMouseDragged.rawValue) |
+    (1 << CGEventType.scrollWheel.rawValue)
 func makeTap() -> CFMachPort? {
     CGEvent.tapCreate(tap: .cghidEventTap, place: .headInsertEventTap, options: .defaultTap,
                       eventsOfInterest: mask, callback: callback,

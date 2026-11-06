@@ -93,6 +93,14 @@ enum Inject {
         }
     }
 
+    /// Uma rolagem vertical de `lines` linhas na posição do cursor. `continuous` = trackpad.
+    static func scroll(_ lines: Int32, continuous: Bool) {
+        let e = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 1, wheel1: lines, wheel2: 0, wheel3: 0)!
+        e.setIntegerValueField(.scrollWheelEventIsContinuous, value: continuous ? 1 : 0)
+        e.setIntegerValueField(.eventSourceUserData, value: testEventTag)
+        e.post(tap: .cghidEventTap)
+    }
+
     static func click(button: Int64) {
         mouse(.otherMouseDown, button: button)
         mouse(.otherMouseUp, button: button)

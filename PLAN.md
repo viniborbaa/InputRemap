@@ -12,6 +12,7 @@ para o mouse **Logitech Lift** e o teclado **MX Keys S**, desenvolvido com
 | Rodinha segurada + arrastar → | Mesa da **direita** (⌃→) |
 | Rodinha segurada + arrastar ↑ | Mission Control (⌃↑) |
 | Rodinha segurada + arrastar ↓ | Launchpad (abre o Launchpad.app) |
+| Rolar a rodinha | Sentido invertido em relação ao trackpad (só a rodinha; trackpad intacto) |
 | Clique simples na rodinha | Mission Control (⌃↑) |
 | Botão Back | ⌘C |
 | Botão Forward | ⌘V |
@@ -225,6 +226,10 @@ Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app e
   adicionar o app nos Ajustes não resolveu. Resolvido com `tccutil reset Accessibility
   com.viniborba.inputremap` + ligar a chave no aviso (o app pega a permissão sem reiniciar).
   O `install.sh` agora faz o reset sozinho quando o binário muda.
+- 2026-11-06 — Rolagem: a "rolagem natural" do macOS vale para trackpad e mouse; o
+  Options+ invertia só o mouse. Agora o app inverte rolagens não contínuas (rodinha) e deixa
+  as contínuas (trackpad). Escrever um campo de delta faz o CG recalcular os outros: ler
+  todos antes. E2E compara com o sentido recebido sem o app; mutação confirmada. Suíte: 63 ✔.
 - 2026-11-06 — **Estado para retomar:** projeto concluído. App instalado via
   `scripts/install.sh` (LaunchAgent), Options+ desinstalado. Pendências opcionais: teste
   de religar (incidente 4, desativado). Para mexer de novo: religar a Acessibilidade do

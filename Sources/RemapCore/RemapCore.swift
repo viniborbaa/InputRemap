@@ -87,3 +87,9 @@ public struct Remapper {
         }
     }
 }
+
+/// Rodinha do mouse no sentido oposto ao do trackpad. A "rolagem natural" do macOS vale para
+/// os dois; a rodinha (rolagem em passos, não contínua) é invertida, o trackpad não.
+public enum ScrollPolicy {
+    public static func shouldInvert(continuous: Bool) -> Bool { !continuous }
+}
