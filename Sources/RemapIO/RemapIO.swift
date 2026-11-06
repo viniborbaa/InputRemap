@@ -58,13 +58,21 @@ public struct KeyPoster {
 
     public init(deliverTo: pid_t? = nil) { self.deliverTo = deliverTo }
 
-    public func post(_ output: Output) {
+    /// Eventos de tecla (pressionar e soltar) do atalho, marcados como gerados pelo app.
+    public static func makeEvents(for output: Output) -> [CGEvent] {
         let k = KeyStroke(for: output)
-        for down in [true, false] {
-            guard let e = CGEvent(keyboardEventSource: nil, virtualKey: k.keyCode, keyDown: down) else { continue }
+        return [true, false].compactMap { down in
+            guard let e = CGEvent(keyboardEventSource: nil, virtualKey: k.keyCode, keyDown: down) else { return nil }
             e.flags = k.flags
             e.setIntegerValueField(.eventSourceUserData, value: ownEventTag)
-            if let pid = deliverTo, k.isAppShortcut { e.postToPid(pid) } else { e.post(tap: .cghidEventTap) }
+            return e
+        }
+    }
+
+    public func post(_ output: Output) {
+        let appShortcut = KeyStroke(for: output).isAppShortcut
+        for e in Self.makeEvents(for: output) {
+            if let pid = deliverTo, appShortcut { e.postToPid(pid) } else { e.post(tap: .cghidEventTap) }
         }
     }
 }

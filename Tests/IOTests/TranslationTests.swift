@@ -57,4 +57,15 @@ import RemapCore
         #expect(KeyStroke(for: .spaceLeft) == KeyStroke(keyCode: 123, flags: Self.arrow))
         #expect(KeyStroke(for: .spaceRight) == KeyStroke(keyCode: 124, flags: Self.arrow))
     }
+
+    @Test func atalhosGeradosPeloAppSaoMarcadosEIgnorados() {
+        let posted = KeyPoster.makeEvents(for: .copy)
+        #expect(posted.allSatisfy { $0.getIntegerValueField(.eventSourceUserData) == ownEventTag })
+        #expect(posted.allSatisfy { EventTranslator.input(from: $0) == nil })
+    }
+
+    @Test func eventosDeTecladoNaoInteressamAoNucleo() {
+        let e = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: true)!
+        #expect(EventTranslator.input(from: e) == nil)
+    }
 }

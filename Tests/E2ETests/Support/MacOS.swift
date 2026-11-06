@@ -78,6 +78,16 @@ enum Inject {
         e.post(tap: .cghidEventTap)
     }
 
+    /// Clique esquerdo ou direito num ponto (cai na janela sob o ponto).
+    static func click(_ down: CGEventType, _ up: CGEventType, at p: CGPoint) {
+        for t in [down, up] {
+            let btn: CGMouseButton = t == .rightMouseDown || t == .rightMouseUp ? .right : .left
+            let e = CGEvent(mouseEventSource: nil, mouseType: t, mouseCursorPosition: p, mouseButton: btn)!
+            e.setIntegerValueField(.eventSourceUserData, value: testEventTag)
+            e.post(tap: .cghidEventTap)
+        }
+    }
+
     static func click(button: Int64) {
         mouse(.otherMouseDown, button: button)
         mouse(.otherMouseUp, button: button)

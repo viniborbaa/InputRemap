@@ -10,9 +10,10 @@ final class AppRunner {
 
     /// `deliverTo`: em modo de teste, ⌘C/⌘V vão direto para esse processo (postToPid),
     /// nunca para o app em foco do usuário.
-    init(deliverTo pid: pid_t) throws {
+    init(deliverTo pid: pid_t, hangButton: Int? = nil) throws {
         process.executableURL = builtProduct("InputRemap")
         process.arguments = ["--deliver-to-pid", String(pid)]
+            + (hangButton.map { ["--test-hang-button", String($0)] } ?? [])
         process.standardOutput = pipe
         pipe.fileHandleForReading.readabilityHandler = { [weak self] h in
             guard let self, let s = String(data: h.availableData, encoding: .utf8) else { return }

@@ -111,7 +111,12 @@ Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app e
 - [x] **Fase 6 — Arrastar ← / → → trocar de mesa**
 - [x] **Fase 7 — Tecla de print → região no clipboard** (sem código no app:
   `scripts/configure-print-key.sh` troca os atalhos do macOS; `--undo` desfaz)
-- [ ] **Fase 8 — Robustez** (sem loop, religar tap após timeout, regressão de passagem)
+- [~] **Fase 8 — Robustez** (sem loop, religar tap após timeout, regressão de passagem)
+  - [x] Cliques esquerdo/direito, botões não mapeados e digitação passam intactos (E2E)
+  - [x] Botões mapeados (3, 4) não vazam para a janela (E2E)
+  - [x] Atalhos gerados pelo app são marcados e ignorados — sem loop (integração)
+  - [ ] Religar tap após timeout: E2E escrito mas **desativado** (incidente 4).
+        Pendente: investigar com logs + checagem de mutação (remover o religamento → teste vermelho)
 - [ ] **Fase 9 — Empacotamento** (.app, assinatura ad-hoc, LaunchAgent, E2E de inicialização/RAM)
 - [ ] **Fase 10 — Troca definitiva** (checklist com hardware físico, desinstalar Options+,
   **remover Acessibilidade do Terminal**)
@@ -191,3 +196,19 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   Solução: janela com `[.moveToActiveSpace, .fullScreenAuxiliary]`, espera do status
   "key" no harness, e `scripts/e2e.sh` + `E2ESpaces` (save/prepare/restore).
   Suíte: 26 unit/integração + 14 E2E = 40 verdes, estáveis em rodadas seguidas.
+- 2026-11-06 — Fase 8: janela de teste ganhou "área de cliques" (metade de baixo);
+  o NSTextView engolia eventos após um clique (loop de arrasto). `Harness.center`
+  agora aponta para essa área. SIGSTOP não provoca timeout do tap (macOS espera para
+  sempre) → flag de teste `--test-hang-button <n>` (trava 3 s no callback).
+- 2026-11-06 — ⚠️ Incidente 4: rodando o teste de religar (hang de 3 s), uma
+  sobreposição do Dock (camadas 18/20, cobrindo as duas telas, com rótulo 177×30 no
+  monitor — parecia App Exposé sem janelas) ficou aberta; ⌃↑, ⌃↓ e clique em área
+  vazia não fecharam; sumiu sozinha depois. Com ela aberta, `E2ESpaces restore` falhou
+  (⌃←/⌃→ não trocam de espaço). Teste desativado. Ideias: logar no app os eventos
+  `tapDisabledBy*`; checar se o macOS entrega os eventos atrasados do botão 6/3 de
+  forma inesperada; fazer `scripts/e2e.sh` checar visão geral aberta antes de restaurar.
+- 2026-11-06 — **Estado para retomar:** 47 testes (1 desativado). Próximo passo:
+  **Fase 9** (empacotar .app, assinatura ad-hoc, LaunchAgent, E2E de inicialização/RAM;
+  o macOS vai pedir Acessibilidade para o InputRemap). Depois Fase 10. Pendência: Fase 8
+  religar. Ambiente: tela do Mac = Mesa 1 | Terminal tela cheia (175) | Mesa 189;
+  monitor = Mesa 60 | Claude tela cheia (21). Rodar E2E sempre via `scripts/e2e.sh`.

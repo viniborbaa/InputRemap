@@ -41,16 +41,31 @@ final class Harness {
         pause(0.2)
     }
 
-    /// Centro da janela de teste em coordenadas globais (origem no canto superior esquerdo).
-    /// Eventos de mouse vão para a janela sob o cursor: injetar aqui garante que, se o
-    /// InputRemap não bloquear o clique, ele cai na janela de teste e não no app do usuário.
-    var center: CGPoint {
+    private var frame: CGRect {
         let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] ?? []
         let w = list.first { ($0[kCGWindowOwnerPID as String] as? Int) == Int(pid) &&
                              ($0[kCGWindowLayer as String] as? Int) == 0 }
         var r = CGRect.zero
         if let b = w?[kCGWindowBounds as String] { CGRectMakeWithDictionaryRepresentation(b as! CFDictionary, &r) }
-        return CGPoint(x: r.midX, y: r.midY)
+        return r
+    }
+
+    /// Centro da área de cliques (metade de baixo da janela), em coordenadas globais.
+    /// Eventos de mouse vão para a janela sob o ponto: injetar aqui garante que, se o
+    /// InputRemap não bloquear o clique, ele cai na janela de teste e não no app do usuário.
+    var center: CGPoint {
+        let r = frame
+        let content = r.height - 28 // barra de título
+        return CGPoint(x: r.midX, y: r.maxY - content / 4)
+    }
+
+    /// Cliques recebidos pela janela, ex.: ["left": 1, "other5": 2].
+    var clicks: [String: Int] {
+        let raw = (try? String(contentsOf: URL(fileURLWithPath: outFile.path + ".clicks"), encoding: .utf8)) ?? ""
+        return Dictionary(uniqueKeysWithValues: raw.split(separator: " ").compactMap { pair in
+            let kv = pair.split(separator: "=")
+            return kv.count == 2 ? (String(kv[0]), Int(kv[1]) ?? 0) : nil
+        })
     }
 
     var content: String { (try? String(contentsOf: outFile, encoding: .utf8)) ?? "" }
@@ -60,5 +75,6 @@ final class Harness {
         process.waitUntilExit()
         try? FileManager.default.removeItem(at: outFile)
         try? FileManager.default.removeItem(at: URL(fileURLWithPath: outFile.path + ".status"))
+        try? FileManager.default.removeItem(at: URL(fileURLWithPath: outFile.path + ".clicks"))
     }
 }

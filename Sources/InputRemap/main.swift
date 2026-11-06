@@ -1,5 +1,9 @@
 // InputRemap — substitui o Logi Options+ para o mouse Lift.
-// Uso: InputRemap [--deliver-to-pid <pid>]   (a flag é só para os testes E2E)
+// Uso: InputRemap [--deliver-to-pid <pid>] [--test-hang-button <n>]
+// As duas flags são só para os testes E2E:
+//   --deliver-to-pid    ⌘C/⌘V vão direto para esse processo (nunca para o app em foco)
+//   --test-hang-button  ao receber esse botão, trava 3 s (provoca o desligamento do tap
+//                       por demora, para testar que o app o religa sozinho)
 
 import CoreGraphics
 import Foundation
@@ -17,6 +21,9 @@ let args = CommandLine.arguments
 let deliverTo = args.firstIndex(of: "--deliver-to-pid").flatMap { i in
     i + 1 < args.count ? pid_t(args[i + 1]) : nil
 }
+let hangButton = args.firstIndex(of: "--test-hang-button").flatMap { i in
+    i + 1 < args.count ? Int64(args[i + 1]) : nil
+}
 let context = Context(poster: KeyPoster(deliverTo: deliverTo))
 
 let callback: CGEventTapCallBack = { _, type, event, info in
@@ -24,6 +31,9 @@ let callback: CGEventTapCallBack = { _, type, event, info in
     if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
         if let t = ctx.tap { CGEvent.tapEnable(tap: t, enable: true) }
         return Unmanaged.passUnretained(event)
+    }
+    if let b = hangButton, type == .otherMouseDown, event.getIntegerValueField(.mouseEventButtonNumber) == b {
+        Thread.sleep(forTimeInterval: 3)
     }
     guard let input = EventTranslator.input(from: event) else { return Unmanaged.passUnretained(event) }
     let decision = ctx.remapper.handle(input)

@@ -19,6 +19,16 @@ let outPath: String = arg("--out") ?? {
     exit(2)
 }()
 
+/// Área que registra cada clique recebido: "left", "right" ou "other<n>".
+final class ClickPad: NSView {
+    var onClick: (String) -> Void = { _ in }
+    override func draw(_ r: NSRect) { NSColor.systemGray.withAlphaComponent(0.2).setFill(); r.fill() }
+    override func acceptsFirstMouse(for e: NSEvent?) -> Bool { true }
+    override func mouseDown(with e: NSEvent) { onClick("left") }
+    override func rightMouseDown(with e: NSEvent) { onClick("right") }
+    override func otherMouseDown(with e: NSEvent) { onClick("other\(e.buttonNumber)") }
+}
+
 final class Delegate: NSObject, NSApplicationDelegate, NSTextViewDelegate {
     var window: NSWindow!
     var textView: NSTextView!
@@ -39,8 +49,17 @@ final class Delegate: NSObject, NSApplicationDelegate, NSTextViewDelegate {
         // de abrir numa mesa escondida onde não fica ativa. (.canJoinAllSpaces tiraria a
         // janela do App Exposé, e o teste de ⌃↓ não teria o que mostrar.)
         window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
-        textView = NSTextView(frame: window.contentView!.bounds)
-        textView.autoresizingMask = [.width, .height]
+        // Metade de cima: campo de texto. Metade de baixo: área que só conta cliques
+        // (o campo de texto entra num loop de arrasto ao ser clicado e engole eventos).
+        let bounds = window.contentView!.bounds
+        let half = bounds.height / 2
+        textView = NSTextView(frame: NSRect(x: 0, y: half, width: bounds.width, height: half))
+        let pad = ClickPad(frame: NSRect(x: 0, y: 0, width: bounds.width, height: half))
+        pad.onClick = { [weak self] name in
+            self?.clicks[name, default: 0] += 1
+            self?.writeClicks()
+        }
+        window.contentView!.addSubview(pad)
         textView.string = initialText
         textView.delegate = self
         window.contentView!.addSubview(textView)
@@ -66,6 +85,15 @@ final class Delegate: NSObject, NSApplicationDelegate, NSTextViewDelegate {
                 writeStatus()
             }
         }
+
+        writeClicks()
+    }
+
+    var clicks: [String: Int] = [:]
+
+    func writeClicks() {
+        let text = clicks.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: " ")
+        try? text.write(toFile: outPath + ".clicks", atomically: true, encoding: .utf8)
     }
 
     func textDidChange(_ n: Notification) { persist() }
