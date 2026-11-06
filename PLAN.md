@@ -139,8 +139,7 @@ Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app e
 
 ## Diário
 
-- 2026-11-06 — Plano criado. Rascunho inicial (não-TDD) guardado em
-  `docs/rascunho-main.swift.txt` apenas como referência.
+- 2026-11-06 — Plano criado.
 - 2026-11-06 — Fase 0: CLT 16.2 com arquivos velhos misturados mesmo após
   reinstalar. Correções (renomeados, não apagados):
   `ManifestAPI/PackageDescription.swiftmodule/*.private.swiftinterface` → `.stale-5.10`
@@ -239,3 +238,12 @@ Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app e
   `pause` (inclusive o de 6 s do teste do print) eram no-op e o `waitUntil` girava sem
   dormir. Corrigido com `Thread.sleep` + teste `pauseEsperaDeVerdade`. Suíte: 55 ✔, 1
   desativado (incidente 4 — talvez relacionado: as esperas não aconteciam).
+- 2026-11-06 — ⚠️ Incidente 5: o macOS ficou com o botão 4 (CGMouseButton 3, Back) "preso"
+  no estado do HID: todo clique comum (até no trackpad) abria o Mission Control, porque há
+  atalhos do sistema no botão 4 (symbolichotkeys 38/40, máscara 8). Parar o InputRemap não
+  resolveu, e mandar um otherMouseUp sintético também não. Resolvido desligando e ligando
+  o mouse. Diagnóstico: `CGEventSource.buttonState(.combinedSessionState, button: 3)`.
+  Causa não confirmada (mouse ou o app engolindo o up?). Na mesma hora a barra de menus
+  em tela cheia não aparecia ao passar o mouse; pode ter sido o mesmo estado preso.
+  Desfecho: a barra continuou sem aparecer mesmo com o botão solto e o Dock
+  reiniciado. Só voltou depois de reiniciar o Mac (2026-11-06 ~17:14). Causa exata não identificada.
