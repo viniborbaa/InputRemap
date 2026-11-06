@@ -16,6 +16,17 @@ import Testing
         #expect(r.handle(.mouseUp(button: Button.back)) == Decision(swallow: true, outputs: []))
     }
 
+    @Test func forwardPressionadoGeraColarEBloqueia() {
+        var r = Remapper()
+        #expect(r.handle(.mouseDown(button: Button.forward)) == Decision(swallow: true, outputs: [.paste]))
+    }
+
+    @Test func forwardSoltoNaoGeraNadaMasBloqueia() {
+        var r = Remapper()
+        _ = r.handle(.mouseDown(button: Button.forward))
+        #expect(r.handle(.mouseUp(button: Button.forward)) == Decision(swallow: true, outputs: []))
+    }
+
     @Test func botoesNaoMapeadosPassamIntactos() {
         var r = Remapper()
         for b in [5, 6, 7] {

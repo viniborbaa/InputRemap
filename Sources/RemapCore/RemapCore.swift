@@ -15,6 +15,7 @@ public enum Input: Equatable {
 /// Ações semânticas; o RemapIO traduz cada uma para um atalho de teclado.
 public enum Output: Equatable {
     case copy
+    case paste
 }
 
 public struct Decision: Equatable {
@@ -35,7 +36,8 @@ public struct Remapper {
     public mutating func handle(_ input: Input) -> Decision {
         switch input {
         case .mouseDown(Button.back): return Decision(swallow: true, outputs: [.copy])
-        case .mouseUp(Button.back): return Decision(swallow: true, outputs: [])
+        case .mouseDown(Button.forward): return Decision(swallow: true, outputs: [.paste])
+        case .mouseUp(Button.back), .mouseUp(Button.forward): return Decision(swallow: true, outputs: [])
         default: return .passThrough
         }
     }

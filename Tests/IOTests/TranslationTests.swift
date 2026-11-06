@@ -30,4 +30,8 @@ import RemapCore
     @Test func copiarEhCmdC() {
         #expect(KeyStroke(for: .copy) == KeyStroke(keyCode: 8, flags: .maskCommand))
     }
+
+    @Test func colarEhCmdV() {
+        #expect(KeyStroke(for: .paste) == KeyStroke(keyCode: 9, flags: .maskCommand))
+    }
 }

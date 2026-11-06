@@ -32,6 +32,7 @@ public struct KeyStroke: Equatable {
     public init(for output: Output) {
         switch output {
         case .copy: self.init(keyCode: 8, flags: .maskCommand)
+        case .paste: self.init(keyCode: 9, flags: .maskCommand)
         }
     }
 

@@ -16,5 +16,16 @@ extension E2E {
             try waitUntil("clipboard receber o texto") { Clipboard.string == marker }
             _ = app
         }
+
+        @Test func forwardColaNoCampo() throws {
+            let marker = "e2e-forward-\(UInt32.random(in: .min ... .max))"
+            Clipboard.set(marker)
+            let h = try Harness(text: "substituir")
+            let app = try AppRunner(deliverTo: h.pid)
+            Inject.mouse(.otherMouseDown, button: 4, at: h.center)
+            Inject.mouse(.otherMouseUp, button: 4, at: h.center)
+            try waitUntil("campo receber o texto colado") { h.content == marker }
+            _ = app
+        }
     }
 }
