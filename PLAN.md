@@ -84,9 +84,9 @@ Pré-requisitos do E2E: ≥2 mesas (Spaces); Terminal com permissão de Acessibi
 ## Fases
 
 - [ ] **Fase 0 — Fundação**
-  - [ ] Pacote Swift + teste vazio rodando com `swift test`
+  - [x] Pacote Swift + teste vazio rodando com `swift test`
   - [ ] Spike E2E: injetar eventos e detectar troca de mesa, Mission Control, clipboard
-  - [ ] Spike: eventos injetados passam pelo event tap do app
+  - [x] Spike: eventos injetados passam pelo event tap do app
 - [ ] **Fase 1 — Descoberta do hardware** (Options+ pausado ~2 min)
   - [ ] Log de eventos: botões do Lift, rodinha, tecla de print
   - [ ] Códigos reais viram constantes testadas
@@ -117,3 +117,19 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   SwiftBridging"). Também apagar o cache `…/C/clang/ModuleCache/PackageDescription-*`.
   Se a CLT for atualizada, conferir se voltaram.
 - 2026-11-06 — Ambiente: 2 telas, 2 mesas por tela. Terminal ainda sem Acessibilidade.
+- 2026-11-06 — Spike E2E (Fase 0):
+  - ✅ Injeção de eventos funciona (Terminal com Acessibilidade).
+  - ✅ Tap em outro processo vê eventos injetados e o `eventSourceUserData`
+    é preservado → marcação anti-loop viável; bloquear (`return nil`) funciona.
+  - ✅ Mesa ativa via `SLSGetActiveSpace`. ⚠️ Na mesa da ponta o atalho não
+    faz nada → o teste precisa escolher a direção pela posição
+    (`SLSCopyManagedDisplaySpaces`) e **sempre restaurar a mesa original**.
+  - ✅ Mission Control/App Exposé abertos = janelas do Dock nas camadas 18/20.
+    ⚠️ Distinguir MC de Exposé por contagem de janelas não é confiável →
+    E2E prova "visão geral abriu"; qual atalho foi enviado fica no teste de
+    integração. Reavaliar na Fase 5.
+  - ❌ Clipboard via TextEdit: a ativação do TextEdit falhou e ⌘A/⌘C caíram
+    no app em foco (Arc). **Regra do E2E:** nunca injetar teclado sem foco
+    garantido → usar janela própria de teste (harness) e verificar que ela é
+    o app em foco antes de cada injeção; abortar o teste caso contrário.
+    Nada foi alterado no Arc (só seleção + cópia); clipboard limpo.
