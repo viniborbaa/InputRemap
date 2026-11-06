@@ -153,3 +153,9 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   manual com hardware.
 - 2026-11-06 — Fase 0 concluída: 5 autotestes do harness verdes 3× seguidas.
   Correção: ⌃←/⌃→ agem na tela do cursor (2 telas, "mesas separadas por tela").
+- 2026-11-06 — Fase 1 (descoberta, Options+ pausado ~1 min, gravador listen-only):
+  - Back = `otherMouse` botão **3**; Forward = botão **4**; clique da rodinha = botão **2**.
+    (Cada um também gera NX_SYSDEFINED subtype 7 com bitmask de botões — ignorar.)
+  - Tecla de print do MX Keys S **sem Options+ envia ⌘⇧4** nativo (keyCode 21,
+    flags ⌘+⇧, modificadores e tecla em ~1 ms) → abre a captura de região **para arquivo**.
+  - "Change pointer speed": sem evento padrão identificado (provável HID++ da Logitech).
