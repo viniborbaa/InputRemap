@@ -52,4 +52,9 @@ import RemapCore
     @Test func appExposeEhCtrlSetaParaBaixo() {
         #expect(KeyStroke(for: .appExpose) == KeyStroke(keyCode: 125, flags: Self.arrow))
     }
+
+    @Test func mesasSaoCtrlSetasLaterais() {
+        #expect(KeyStroke(for: .spaceLeft) == KeyStroke(keyCode: 123, flags: Self.arrow))
+        #expect(KeyStroke(for: .spaceRight) == KeyStroke(keyCode: 124, flags: Self.arrow))
+    }
 }

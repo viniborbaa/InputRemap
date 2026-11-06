@@ -61,5 +61,34 @@ extension E2E {
 
         @Test func arrastarParaCimaAbreMissionControl() throws { try dragOpensOverview(dy: -150, toggle: 126) }
         @Test func arrastarParaBaixoAbreAppExpose() throws { try dragOpensOverview(dy: 150, toggle: 125) }
+    
+        // MARK: Fase 6
+
+        /// Arrasta na horizontal numa tela com 2+ mesas comuns e confere que a mesa ativa
+        /// virou a vizinha NA DIREÇÃO do arrasto. Sempre restaura a mesa original.
+        @Test func arrastarNaHorizontalTrocaParaMesaVizinha() throws {
+            try #require(!Overview.isOpen())
+            let target = try #require(Spaces.displayWithMultipleSpaces(), "precisa de uma tela com 2+ mesas comuns")
+            let h = try Harness(text: "mesa", center: CGPoint(x: target.bounds.midX, y: target.bounds.midY))
+            let app = try AppRunner(deliverTo: h.pid)
+            Inject.mouse(.mouseMoved, button: 0, at: h.center)
+            pause(0.2)
+            let start = Spaces.cursorDisplay()
+            let goRight = start.index < start.spaces.count - 1
+            let expected = start.spaces[start.index + (goRight ? 1 : -1)]
+            defer {
+                // Se o gesto falhar, soltar vira clique → Mission Control; fecha.
+                Overview.close(toggle: 126)
+                if Spaces.cursorDisplay().current != start.current {
+                    Inject.systemKey(goRight ? 123 : 124, .maskControl)
+                    try? waitUntil("voltar à mesa original") { Spaces.cursorDisplay().current == start.current }
+                }
+                _ = (h, app)
+            }
+            Inject.drag(button: 2, dx: goRight ? 150 : -150, dy: 0)
+            try waitUntil("ir para a mesa \(goRight ? "da direita" : "da esquerda")") {
+                Spaces.cursorDisplay().current == expected
+            }
+        }
     }
 }

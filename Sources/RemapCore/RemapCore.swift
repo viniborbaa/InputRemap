@@ -19,6 +19,8 @@ public enum Output: Equatable {
     case paste
     case missionControl
     case appExpose
+    case spaceLeft
+    case spaceRight
 }
 
 public struct Decision: Equatable {
@@ -51,7 +53,7 @@ public struct Remapper {
     static func direction(dx: Double, dy: Double) -> Output? {
         guard max(abs(dx), abs(dy)) > threshold else { return nil }
         if abs(dy) >= abs(dx) { return dy < 0 ? .missionControl : .appExpose }
-        return nil // horizontal: Fase 6
+        return dx < 0 ? .spaceLeft : .spaceRight
     }
 
     public init() {}

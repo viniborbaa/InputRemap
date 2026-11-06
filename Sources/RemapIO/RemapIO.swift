@@ -39,6 +39,8 @@ public struct KeyStroke: Equatable {
         case .paste: self.init(keyCode: 9, flags: .maskCommand)
         case .missionControl: self.init(keyCode: 126, flags: Self.arrow)
         case .appExpose: self.init(keyCode: 125, flags: Self.arrow)
+        case .spaceLeft: self.init(keyCode: 123, flags: Self.arrow)
+        case .spaceRight: self.init(keyCode: 124, flags: Self.arrow)
         }
     }
 

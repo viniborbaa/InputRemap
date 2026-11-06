@@ -77,8 +77,13 @@ tecla de print são cobertos por checklist manual (Fase 1 e Fase 10), via log.
 
 ```sh
 swift test --skip E2E   # unitários + integração (rápido, sem efeito na tela)
-E2E=1 swift test        # tudo; o E2E toma a tela por ~30–60 s, não mexa no mouse
+scripts/e2e.sh          # tudo, com E2E; toma a tela por ~25 s, não mexa no mouse
+scripts/e2e.sh --filter PrintKeyTests   # só um grupo
 ```
+
+`scripts/e2e.sh` anota o espaço de cada tela e a posição do cursor, leva a tela
+principal para uma mesa comum (a janela de teste não abre sobre app em tela cheia),
+roda `E2E=1 swift test` e restaura tudo no final, mesmo se os testes falharem.
 
 Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app em tela cheia não contam); Terminal com permissão de Acessibilidade.
 
@@ -103,7 +108,7 @@ Pré-requisitos do E2E: alguma tela com ≥2 **mesas comuns** (espaços de app e
 - [x] **Fase 3 — Forward → ⌘V**
 - [x] **Fase 4 — Clique simples na rodinha → Mission Control**
 - [x] **Fase 5 — Arrastar ↑ / ↓ → Mission Control / App Exposé**
-- [ ] **Fase 6 — Arrastar ← / → → trocar de mesa**
+- [x] **Fase 6 — Arrastar ← / → → trocar de mesa**
 - [x] **Fase 7 — Tecla de print → região no clipboard** (sem código no app:
   `scripts/configure-print-key.sh` troca os atalhos do macOS; `--undo` desfaz)
 - [ ] **Fase 8 — Robustez** (sem loop, religar tap após timeout, regressão de passagem)
@@ -180,3 +185,9 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
 - 2026-11-06 — Testes de mesa: escolhem uma tela com ≥2 mesas comuns e abrem a
   janela de teste lá. A "mesa" 21 do monitor externo é um app em tela cheia (type 4)
   e é ignorada.
+- 2026-11-06 — Fase 6 concluída. Achados: (1) a janela de teste não fica ativa se a
+  tela principal estiver num app em tela cheia — o macOS pula para uma mesa comum e
+  o usuário "perde" o Terminal; (2) `.canJoinAllSpaces` tira a janela do App Exposé.
+  Solução: janela com `[.moveToActiveSpace, .fullScreenAuxiliary]`, espera do status
+  "key" no harness, e `scripts/e2e.sh` + `E2ESpaces` (save/prepare/restore).
+  Suíte: 26 unit/integração + 14 E2E = 40 verdes, estáveis em rodadas seguidas.

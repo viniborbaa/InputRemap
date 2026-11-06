@@ -35,6 +35,10 @@ final class Delegate: NSObject, NSApplicationDelegate, NSTextViewDelegate {
             window.setFrameOrigin(NSPoint(x: x - 210, y: mainHeight - y - 80))
         }
         window.title = "InputRemap E2E"
+        // Aparece no espaço atual, mesmo sobre um app em tela cheia (ex.: Terminal), em vez
+        // de abrir numa mesa escondida onde não fica ativa. (.canJoinAllSpaces tiraria a
+        // janela do App Exposé, e o teste de ⌃↓ não teria o que mostrar.)
+        window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
         textView = NSTextView(frame: window.contentView!.bounds)
         textView.autoresizingMask = [.width, .height]
         textView.string = initialText

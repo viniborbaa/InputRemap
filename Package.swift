@@ -12,6 +12,8 @@ let package = Package(
         .executableTarget(name: "E2EHarness"),
         // Gravador de eventos (Fase 1): só escuta, para descobrir os códigos do hardware.
         .executableTarget(name: "HardwareProbe"),
+        // Guarda/restaura o espaço de cada tela em volta do E2E (scripts/e2e.sh).
+        .executableTarget(name: "E2ESpaces"),
         .testTarget(name: "CoreTests", dependencies: ["RemapCore"]),
         .testTarget(name: "IOTests", dependencies: ["RemapIO"]),
         .testTarget(name: "E2ETests", dependencies: ["E2EHarness", "InputRemap"]),

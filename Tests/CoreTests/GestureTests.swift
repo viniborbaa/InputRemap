@@ -70,4 +70,21 @@ import Testing
         _ = gesture(&r, steps: [(0, -100)])
         #expect(allOutputs(gesture(&r, steps: [(0, 100)])) == [.appExpose])
     }
+
+    // MARK: Fase 6 — arrastar ← / →
+
+    @Test func arrastarParaEsquerdaVaiParaMesaDaEsquerda() {
+        var r = Remapper()
+        #expect(allOutputs(gesture(&r, steps: [(-40, 0), (-40, 0)])) == [.spaceLeft])
+    }
+
+    @Test func arrastarParaDireitaVaiParaMesaDaDireita() {
+        var r = Remapper()
+        #expect(allOutputs(gesture(&r, steps: [(40, 0), (40, 0)])) == [.spaceRight])
+    }
+
+    @Test func horizontalDominanteVenceVertical() {
+        var r = Remapper()
+        #expect(allOutputs(gesture(&r, steps: [(-70, 40)])) == [.spaceLeft])
+    }
 }

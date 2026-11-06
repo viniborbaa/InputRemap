@@ -33,7 +33,12 @@ final class Harness {
         try waitUntil("janela de teste abrir", timeout: 5) {
             FileManager.default.fileExists(atPath: outFile.path)
         }
-        pause(0.3) // deixa o campo de texto assumir o cursor
+        // Pronta = a própria janela diz que é a janela-chave ativa. Não é garantia de
+        // foco para teclas globais (incidente 2), mas é pré-requisito para ⌘C/⌘V via pid.
+        try waitUntil("janela de teste ficar ativa", timeout: 5) {
+            (try? String(contentsOf: URL(fileURLWithPath: outFile.path + ".status"), encoding: .utf8)) == "key"
+        }
+        pause(0.2)
     }
 
     /// Centro da janela de teste em coordenadas globais (origem no canto superior esquerdo).
