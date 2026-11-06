@@ -217,6 +217,10 @@ A qualquer momento: religar o Options+ (`launchctl bootstrap gui/$(id -u)
   Exposé) não era usado → trocado por **Launchpad** a pedido do usuário. Sem atalho de
   teclado padrão, o app abre o Launchpad.app (liga/desliga). Ao fechar, o Launchpad passa
   por janelas nas camadas 18/20; o E2E espera elas sumirem.
+- 2026-11-06 — Reinstalar trocou a assinatura e a permissão parou de valer; remover/
+  adicionar o app nos Ajustes não resolveu. Resolvido com `tccutil reset Accessibility
+  com.viniborba.inputremap` + ligar a chave no aviso (o app pega a permissão sem reiniciar).
+  O `install.sh` agora faz o reset sozinho quando o binário muda.
 - 2026-11-06 — **Estado para retomar:** 56 testes (1 desativado). Próximo passo:
   **Fase 10** (checklist com o hardware físico, desinstalar Options+, tirar
   Acessibilidade do Terminal). Fase 9 feita: app instalado e com Acessibilidade. Pendência: Fase 8

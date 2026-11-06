@@ -54,7 +54,10 @@ if ! cmp -s "$NEW" "$LAST" 2>/dev/null || [ ! -f "$BIN" ]; then
     mkdir -p "$(dirname "$LAST")"
     cp "$NEW" "$LAST"
     cp "$NEW" "$BIN"
-    echo "binário atualizado (o macOS pode pedir a Acessibilidade de novo)"
+    # A permissão antiga não vale para o binário novo (assinatura ad-hoc) e remover/adicionar
+    # nos Ajustes não a substitui direito: apaga o registro para o macOS perguntar do zero.
+    tccutil reset Accessibility "$LABEL" >/dev/null 2>&1 || true
+    echo "binário atualizado: aceite o aviso de Acessibilidade do InputRemap"
 fi
 codesign --force --sign - --identifier "$LABEL" "$APP" 2>/dev/null
 
