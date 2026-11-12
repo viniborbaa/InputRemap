@@ -85,5 +85,8 @@ let tap = created!
 context.tap = tap
 CFRunLoopAddSource(CFRunLoopGetCurrent(), CFMachPortCreateRunLoopSource(nil, tap, 0), .commonModes)
 CGEvent.tapEnable(tap: tap, enable: true)
+// Tecla da calculadora do MX Keys S (só instalado: o E2E não mexe no teclado real).
+let keyboard = LogitechKeys(onPress: context.poster.post, log: log)
+if deliverTo == nil { keyboard.start() }
 print("pronto"); fflush(stdout)
 CFRunLoopRun()

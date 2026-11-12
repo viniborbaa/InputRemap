@@ -21,6 +21,8 @@ public enum Output: Equatable {
     case launchpad
     case spaceLeft
     case spaceRight
+    /// Tecla da calculadora do MX Keys S (vem pelo HID++, não pelo event tap).
+    case calculator
 }
 
 public struct Decision: Equatable {

@@ -5,8 +5,8 @@
 # Uso: scripts/install.sh            instala/atualiza
 #      scripts/install.sh --uninstall remove tudo
 #
-# Atenção: a permissão de Acessibilidade fica presa à assinatura do binário. Se o binário
-# mudar, o macOS pode pedir a permissão de novo. Por isso o binário só é substituído
+# Atenção: as permissões (Acessibilidade e Monitoramento de Entrada) ficam presas à assinatura do binário. Se o binário
+# mudar, o macOS pode pedir as permissões de novo. Por isso o binário só é substituído
 # quando muda.
 set -e
 cd "$(dirname "$0")/.."
@@ -57,7 +57,8 @@ if ! cmp -s "$NEW" "$LAST" 2>/dev/null || [ ! -f "$BIN" ]; then
     # A permissão antiga não vale para o binário novo (assinatura ad-hoc) e remover/adicionar
     # nos Ajustes não a substitui direito: apaga o registro para o macOS perguntar do zero.
     tccutil reset Accessibility "$LABEL" >/dev/null 2>&1 || true
-    echo "binário atualizado: aceite o aviso de Acessibilidade do InputRemap"
+    tccutil reset ListenEvent "$LABEL" >/dev/null 2>&1 || true
+    echo "binário atualizado: aceite os avisos de Acessibilidade e Monitoramento de Entrada do InputRemap"
 fi
 codesign --force --sign - --identifier "$LABEL" "$APP" 2>/dev/null
 

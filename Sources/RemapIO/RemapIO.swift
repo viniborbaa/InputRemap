@@ -45,7 +45,7 @@ public struct KeyStroke: Equatable {
         case .copy: self.init(keyCode: 8, flags: .maskCommand)
         case .paste: self.init(keyCode: 9, flags: .maskCommand)
         case .missionControl: self.init(keyCode: 126, flags: Self.arrow)
-        case .launchpad: return nil
+        case .launchpad, .calculator: return nil
         case .spaceLeft: self.init(keyCode: 123, flags: Self.arrow)
         case .spaceRight: self.init(keyCode: 124, flags: Self.arrow)
         }
@@ -61,7 +61,11 @@ public struct KeyStroke: Equatable {
 /// Saídas que abrem um app em vez de mandar uma tecla.
 public enum Launcher {
     public static func app(for output: Output) -> URL? {
-        output == .launchpad ? URL(fileURLWithPath: "/System/Applications/Launchpad.app") : nil
+        switch output {
+        case .launchpad: URL(fileURLWithPath: "/System/Applications/Launchpad.app")
+        case .calculator: URL(fileURLWithPath: "/System/Applications/Calculator.app")
+        default: nil
+        }
     }
 }
 

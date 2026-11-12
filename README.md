@@ -19,9 +19,15 @@ no UI, no daemon fleet, no account. Just one `CGEventTap`.
 | Back button | Copy (⌘C) |
 | Forward button | Paste (⌘V) |
 | Scroll wheel | Reversed relative to the trackpad (trackpad keeps "natural" scrolling) |
+| Calculator key (MX Keys S) | Opens Calculator |
 
 Gestures fire once per press, on the dominant axis, after 60 px of travel. Anything not
 listed (left/right clicks, other buttons, keyboard) passes through untouched.
+
+The MX Keys S calculator key sends nothing to macOS on its own (in Mac mode). Options+
+handled it over Logitech's HID++ channel, and so does InputRemap now: it asks the keyboard
+to divert that key (feature `0x1B04`) on every connection and opens Calculator on each
+press. This needs the **Input Monitoring** permission in addition to Accessibility.
 
 Optional, via a separate script: the screenshot key on the **MX Keys S** sends ⌘⇧4
 without Options+, so `scripts/configure-print-key.sh` swaps the macOS shortcuts so that
